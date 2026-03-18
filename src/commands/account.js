@@ -1,5 +1,5 @@
 import { makeRequest } from '../api.js';
-import { printOutput } from '../formatter.js';
+import { printOutput, saveToCsv } from '../formatter.js';
 
 export function registerAccountCommand(program) {
   const account = program.command('account').description('Account operations');
@@ -195,6 +195,7 @@ export function registerAccountCommand(program) {
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
+    .option('--output <file>', 'Save result as JSON to a file (e.g. out.json)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const params = { address: opts.address };
@@ -209,7 +210,11 @@ export function registerAccountCommand(program) {
       if (opts.sortOrder) params.sort_order = opts.sortOrder;
 
       const data = await makeRequest('/account/defi/activities/export', params, { apiKey: root.apiKey });
-      printOutput(data, root.json);
+      if (opts.output) {
+        saveToCsv(opts.output, data);
+      } else {
+        printOutput(data, root.json);
+      }
     });
 
   account
@@ -256,13 +261,18 @@ export function registerAccountCommand(program) {
     .requiredOption('--address <address>', 'A wallet address on solana blockchain')
     .option('--time-from <timestamp>', 'Start time (unix seconds). Default: 1 month before time-to')
     .option('--time-to <timestamp>', 'End time (unix seconds). Default: current time')
+    .option('--output <file>', 'Save result to a csv file (e.g. out.csv)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const params = { address: opts.address };
       if (opts.timeFrom) params.time_from = parseInt(opts.timeFrom);
       if (opts.timeTo) params.time_to = parseInt(opts.timeTo);
       const data = await makeRequest('/account/reward/export', params, { apiKey: root.apiKey });
-      printOutput(data, root.json);
+      if (opts.output) {
+        saveToCsv(opts.output, data);
+      } else {
+        printOutput(data, root.json);
+      }
     });
 
   account
@@ -279,6 +289,7 @@ export function registerAccountCommand(program) {
     .option('--to-time <timestamp>', 'End time (unix seconds)')
     .option('--exclude-amount-zero', 'Exclude transfers with zero amount')
     .option('--flow <direction>', 'Filter by transfer direction: in | out')
+    .option('--output <file>', 'Save result to a csv file (e.g. out.csv)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const params = { address: opts.address };
@@ -298,7 +309,11 @@ export function registerAccountCommand(program) {
       if (opts.flow) params.flow = opts.flow;
 
       const data = await makeRequest('/account/transfer/export', params, { apiKey: root.apiKey });
-      printOutput(data, root.json);
+      if (opts.output) {
+        saveToCsv(opts.output, data);
+      } else {
+        printOutput(data, root.json);
+      }
     });
 
   account

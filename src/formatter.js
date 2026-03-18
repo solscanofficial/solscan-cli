@@ -1,3 +1,13 @@
+import { writeFileSync } from 'fs';
+
+/**
+ * Write raw CSV content to a file.
+ */
+export function saveToCsv(filePath, csvStr) {
+  writeFileSync(filePath, csvStr, 'utf8');
+  console.log(`Saved to ${filePath}`);
+}
+
 export function formatOutput(data, useJson = true) {
   if (useJson) {
     return JSON.stringify(data, null, 2);

@@ -1,5 +1,5 @@
 import { makeRequest } from '../api.js';
-import { printOutput } from '../formatter.js';
+import { printOutput, saveToCsv } from '../formatter.js';
 
 export function registerTokenCommand(program) {
   const token = program.command('token').description('Token operations');
@@ -254,6 +254,7 @@ export function registerTokenCommand(program) {
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
+    .option('--output <file>', 'Save result to a csv file (e.g. out.csv)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const params = { address: opts.address };
@@ -268,7 +269,11 @@ export function registerTokenCommand(program) {
       if (opts.sortOrder) params.sort_order = opts.sortOrder;
 
       const data = await makeRequest('/token/defi/activities/export', params, { apiKey: root.apiKey });
-      printOutput(data, root.json);
+      if (opts.output) {
+        saveToCsv(opts.output, data);
+      } else {
+        printOutput(data, root.json);
+      }
     });
 
   token

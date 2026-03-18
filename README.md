@@ -179,10 +179,10 @@ solscan account <action> [options]
 | `stake` | Get active stake accounts of an address | `--address` | `--page`, `--page-size`, `--sort-by`, `--sort-order` |
 | `portfolio` | Get token holdings with USD value for an address | `--address` | `--exclude-low-score-tokens` |
 | `defi` | Get DeFi protocol interactions of an account | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-order`, `--page`, `--page-size` |
-| `defi-export` | Export DeFi activity history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-order` |
+| `defi-export` | Export DeFi activity history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-order`, `--output` |
 | `balance-change` | Get historical balance changes for an account | `--address` | `--token-account`, `--token`, `--from-time`, `--to-time`, `--remove-spam`, `--amount`, `--flow`, `--sort-order`, `--page`, `--page-size` |
-| `reward-export` | Export staking reward history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--time-from`, `--time-to` |
-| `transfer-export` | Export transfer history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--activity-type`, `--token-account`, `--from`, `--to`, `--token`, `--amount`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow` |
+| `reward-export` | Export staking reward history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--time-from`, `--time-to`, `--output` |
+| `transfer-export` | Export transfer history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--activity-type`, `--token-account`, `--from`, `--to`, `--token`, `--amount`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow`, `--output` |
 | `metadata` | Get label, icon, tags, domain, and funder of an account | `--address` | — |
 | `metadata-multi` | Get metadata of multiple accounts (max 50) | `--addresses` | — |
 | `leaderboard` | Get top accounts ranked by portfolio value | — | `--sort-by`, `--sort-order`, `--page`, `--page-size` |
@@ -271,6 +271,14 @@ ACTIVITY_REPAY_BORROWING      ACTIVITY_LIQUIDATE_BORROWING
 ACTIVITY_BRIDGE_ORDER_IN      ACTIVITY_BRIDGE_ORDER_OUT
 ```
 
+**Option details for `defi-export`, `reward-export`, `transfer-export`:**
+
+All export commands accept an additional option:
+
+| Option | Description |
+|--------|-------------|
+| `--output <file>` | Save the CSV response to a file (e.g. `out.csv`). Without this flag the raw CSV is printed to stdout. |
+
 **Option details for `balance-change`:**
 
 | Option | Description |
@@ -325,12 +333,24 @@ solscan account defi --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
 solscan account balance-change --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
   --token EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v --remove-spam
 
-# Export rewards for last month (default)
+# Export rewards for last month (default) — prints raw CSV
 solscan account reward-export --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
 
 # Export rewards for a specific time range
 solscan account reward-export --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
   --time-from 1700000000 --time-to 1702678400
+
+# Export rewards and save to CSV file
+solscan account reward-export --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
+  --output rewards.csv
+
+# Export DeFi activities and save to CSV file
+solscan account defi-export --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
+  --output defi.csv
+
+# Export transfer history and save to CSV file
+solscan account transfer-export --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
+  --output transfers.csv
 
 # Stake accounts sorted by delegated stake
 solscan account stake --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
@@ -368,7 +388,7 @@ solscan token <action> [options]
 | `latest` | Get newly listed tokens, filterable by launch platform | — | `--platform-id`, `--page`, `--page-size` |
 | `transfers` | Get transfer history for a token | `--address` | `--activity-type`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--amount`, `--value`, `--exclude-amount-zero`, `--sort-order`, `--page`, `--page-size` |
 | `defi` | Get DeFi activity involving a token | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-order`, `--page`, `--page-size` |
-| `defi-export` | Export DeFi activity history of a token as CSV | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-order` |
+| `defi-export` | Export DeFi activity history of a token as CSV | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-order`, `--output` |
 | `historical` | Get historical price data for a token (range: 7 or 30 days) | `--address` | `--range` |
 | `search` | Search tokens by keyword, address, name, or symbol | `--keyword` | `--search-mode`, `--search-by`, `--exclude-unverified`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 
@@ -404,6 +424,12 @@ solscan token <action> [options]
 |--------|-------------|---------|--------------|
 | `--platform-id <platform>` | Filter by launch platform | — | `jupiter`, `raydium`, `orca`, `pumpfun`, `meteora`, `lifinity`, `sanctum`, `kamino`, `phoenix`, `openbook`, `apepro`, `stabble`, `jupiterdca`, `jupiter_limit_order`, `solfi`, `zerofi`, `letsbonkfun_launchpad`, `raydium_launchlab`, `believe_launchpad`, `moonshot_launchpad`, `jup_studio_launchpad`, `bags_launchpad` |
 | `--page / --page-size` | Pagination | `1` / `10` | page_size: `10`, `20`, `30`, `40`, `60`, `100` |
+
+**Option details for `defi-export` (token):**
+
+| Option | Description |
+|--------|-------------|
+| `--output <file>` | Save the CSV response to a file (e.g. `out.csv`). Without this flag the raw CSV is printed to stdout. |
 
 **Option details for `historical`:**
 
@@ -465,6 +491,10 @@ solscan token holders --address EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
 
 # Top tokens (no parameters)
 solscan token top
+
+# Export token DeFi activities and save to CSV file
+solscan token defi-export --address So11111111111111111111111111111111111111112 \
+  --output sol-defi.csv
 ```
 
 ---
