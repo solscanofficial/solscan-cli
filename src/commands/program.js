@@ -6,25 +6,26 @@ export function registerProgramCommand(program) {
 
   prog
     .command('list')
-    .description('List programs')
+    .description('Get list of programs active in 90 days')
     .option('--page <number>', 'Page number', '1')
-    .option('--page-size <number>', 'Page size', '10')
-    .option('--sort-by <field>', 'Sort field', 'tx_count_24h')
-    .option('--direction <dir>', 'Sort direction (asc/desc)', 'desc')
+    .option('--page-size <number>', 'Items per page (10, 20, 30, 40)', '10')
+    .option('--sort-by <field>', 'Sort field: num_txs | num_txs_success | interaction_volume | success_rate | active_users_24h', 'num_txs')
+    .option('--sort-order <order>', 'Sort order: asc | desc')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
-      const data = await makeRequest('/program/list', {
+      const params = {
         page: parseInt(opts.page),
         page_size: parseInt(opts.pageSize),
         sort_by: opts.sortBy,
-        direction: opts.direction,
-      }, { apiKey: root.apiKey });
+      };
+      if (opts.sortOrder) params.sort_order = opts.sortOrder;
+      const data = await makeRequest('/program/list', params, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });
 
   prog
     .command('popular')
-    .description('Get popular platforms')
+    .description('Get the list of popular defi platforms')
     .action(async (_opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const data = await makeRequest('/program/popular/platforms', {}, { apiKey: root.apiKey });
@@ -33,14 +34,14 @@ export function registerProgramCommand(program) {
 
   prog
     .command('analytics')
-    .description('Get program analytics')
-    .requiredOption('--address <address>', 'Program address')
-    .option('--type <type>', 'Time range (e.g. 24h)', '24h')
+    .description('Get comprehensive on-chain analytics for a Solana program')
+    .requiredOption('--address <address>', 'A program address on solana blockchain')
+    .requiredOption('--range <days>', 'Time range in days: 7 | 30')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const data = await makeRequest('/program/analytics', {
-        program_address: opts.address,
-        type: opts.type,
+        address: opts.address,
+        range: parseInt(opts.range),
       }, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });

@@ -6,8 +6,8 @@ export function registerBlockCommand(program) {
 
   block
     .command('last')
-    .description('Get last blocks')
-    .option('--limit <number>', 'Limit (10, 20, 30, 40, 60, 100)', '10')
+    .description('Get the list of the latest blocks')
+    .option('--limit <number>', 'Number of blocks (10, 20, 30, 40, 60, 100)', '10')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const data = await makeRequest('/block/last', { limit: parseInt(opts.limit) }, { apiKey: root.apiKey });
@@ -16,8 +16,8 @@ export function registerBlockCommand(program) {
 
   block
     .command('detail')
-    .description('Get block detail')
-    .requiredOption('--block <slot>', 'Block slot number')
+    .description('Get the details of a block')
+    .requiredOption('--block <slot>', 'The slot index of a block')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const data = await makeRequest('/block/detail', { block: opts.block }, { apiKey: root.apiKey });
@@ -26,17 +26,22 @@ export function registerBlockCommand(program) {
 
   block
     .command('transactions')
-    .description('Get block transactions')
-    .requiredOption('--block <slot>', 'Block slot number')
+    .description('Get the list of transactions of a block')
+    .requiredOption('--block <slot>', 'The slot index of a block')
     .option('--page <number>', 'Page number', '1')
-    .option('--page-size <number>', 'Page size', '10')
+    .option('--page-size <number>', 'Items per page (10, 20, 30, 40, 60, 100)', '10')
+    .option('--exclude-vote', 'Excludes vote transactions from the results')
+    .option('--program <address>', 'Filter by program address')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
-      const data = await makeRequest('/block/transactions', {
+      const params = {
         block: opts.block,
         page: parseInt(opts.page),
         page_size: parseInt(opts.pageSize),
-      }, { apiKey: root.apiKey });
+      };
+      if (opts.excludeVote) params.exclude_vote = true;
+      if (opts.program) params.program = opts.program;
+      const data = await makeRequest('/block/transactions', params, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });
 }
