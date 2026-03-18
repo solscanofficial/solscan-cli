@@ -301,10 +301,10 @@ ACTIVITY_BRIDGE_ORDER_IN      ACTIVITY_BRIDGE_ORDER_OUT
 solscan account detail --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
 
 # List SPL token accounts
-solscan account tokens --address 2Ugqbvmp7A6iv87R39TNbWy6SDpQ6Usrzqh44hwGCbCx --page 1 --page-size 20
+solscan account tokens --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM --page 1 --page-size 20
 
 # List NFT accounts only
-solscan account tokens --address 2Ugqbvmp7A6iv87R39TNbWy6SDpQ6Usrzqh44hwGCbCx --type nft --hide-zero
+solscan account tokens --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM --type nft --hide-zero
 
 # Portfolio with low-score tokens excluded
 solscan account portfolio --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM --exclude-low-score-tokens
@@ -811,7 +811,7 @@ solscan token trending --no-json
 address                                             symbol  name         price
 --------------------------------------------------  ------  -----------  ------
 So11111111111111111111111111111111111111112          SOL     Wrapped SOL  175.42
-EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v      USDC    USD Coin     1.00
+EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v         USDC    USD Coin     1.00
 ```
 
 ---
