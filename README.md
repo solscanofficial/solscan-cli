@@ -44,7 +44,7 @@ Supports 55+ actions across accounts, tokens, transactions, NFTs, blocks, market
 ### Install globally
 
 ```bash
-npm install -g @solscan/cli
+npm install -g solscan-cli
 ```
 
 ### From source (local development)
@@ -76,7 +76,7 @@ solscan <command>
 ### Via npx (no install)
 
 ```bash
-npx @solscan/cli <command>
+npx solscan-cli <command>
 ```
 
 ---
