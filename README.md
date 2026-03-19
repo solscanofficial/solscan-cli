@@ -173,14 +173,14 @@ solscan account <action> [options]
 |--------|-------------|----------|---------|
 | `detail` | Get lamports, owner, and executable flag of an account | `--address` | — |
 | `data-decoded` | Get account data with decoded information | `--address` | — |
-| `tokens` | Get associated token and NFT accounts of an address | `--address` | `--type`, `--page`, `--page-size`, `--hide-zero` |
+| `tokens` | Get associated token and NFT accounts of an address | `--address`, `--type` | `--page`, `--page-size`, `--hide-zero` |
 | `transactions` | Get recent transactions for an address (cursor-based pagination) | `--address` | `--before`, `--limit` |
 | `transfers` | Get SPL and SOL transfer history of an account | `--address` | `--activity-type`, `--token-account`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--token`, `--amount`, `--value`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow`, `--sort-order`, `--page`, `--page-size` |
 | `stake` | Get active stake accounts of an address | `--address` | `--page`, `--page-size`, `--sort-by`, `--sort-order` |
 | `portfolio` | Get token holdings with USD value for an address | `--address` | `--exclude-low-score-tokens` |
-| `defi` | Get DeFi protocol interactions of an account | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-order`, `--page`, `--page-size` |
-| `defi-export` | Export DeFi activity history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-order`, `--output` |
-| `balance-change` | Get historical balance changes for an account | `--address` | `--token-account`, `--token`, `--from-time`, `--to-time`, `--remove-spam`, `--amount`, `--flow`, `--sort-order`, `--page`, `--page-size` |
+| `defi` | Get DeFi protocol interactions of an account | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
+| `defi-export` | Export DeFi activity history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--output` |
+| `balance-change` | Get historical balance changes for an account | `--address` | `--token-account`, `--token`, `--from-time`, `--to-time`, `--remove-spam`, `--amount`, `--flow`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 | `reward-export` | Export staking reward history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--time-from`, `--time-to`, `--output` |
 | `transfer-export` | Export transfer history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--activity-type`, `--token-account`, `--from`, `--to`, `--token`, `--amount`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow`, `--output` |
 | `metadata` | Get label, icon, tags, domain, and funder of an account | `--address` | — |
@@ -191,7 +191,7 @@ solscan account <action> [options]
 
 | Option | Description | Default | Valid Values |
 |--------|-------------|---------|--------------|
-| `--type <type>` | Type of token | `token` | `token`, `nft` |
+| `--type <type>` | Type of token (required) | — | `token`, `nft` |
 | `--page <number>` | Page number | `1` | — |
 | `--page-size <number>` | Items per page | `10` | `10`, `20`, `30`, `40` |
 | `--hide-zero` | Hide accounts with zero balance | off | — |
@@ -245,17 +245,18 @@ ACTIVITY_SPL_VOTE_WITHDRAW    ACTIVITY_SPL_SET_OWNER_AUTHORITY
 
 **Option details for `defi`:**
 
-| Option | Description |
-|--------|-------------|
-| `--activity-type <types>` | Comma-separated DeFi activity types |
-| `--from <address>` | Filter activities from an address |
-| `--platform <addresses>` | Comma-separated platform addresses (max 5) |
-| `--source <addresses>` | Comma-separated source addresses (max 5) |
-| `--token <address>` | Filter by token address |
-| `--from-time <timestamp>` | Start time (unix seconds) |
-| `--to-time <timestamp>` | End time (unix seconds) |
-| `--sort-order <order>` | `asc` \| `desc` (default: `desc`) |
-| `--page / --page-size` | Pagination (page_size: 10, 20, 30, 40, 60, 100) |
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--activity-type <types>` | Comma-separated DeFi activity types | — |
+| `--from <address>` | Filter activities from an address | — |
+| `--platform <addresses>` | Comma-separated platform addresses (max 5) | — |
+| `--source <addresses>` | Comma-separated source addresses (max 5) | — |
+| `--token <address>` | Filter by token address | — |
+| `--from-time <timestamp>` | Start time (unix seconds) | — |
+| `--to-time <timestamp>` | End time (unix seconds) | — |
+| `--sort-by <field>` | Sort field | `block_time` |
+| `--sort-order <order>` | Sort order: `asc` \| `desc` | `desc` |
+| `--page / --page-size` | Pagination | `1` / `10` (page_size: 10, 20, 30, 40, 60, 100) |
 
 **DeFi activity types:**
 
@@ -281,16 +282,18 @@ All export commands accept an additional option:
 
 **Option details for `balance-change`:**
 
-| Option | Description |
-|--------|-------------|
-| `--token-account <account>` | Filter by specific token account |
-| `--token <address>` | Filter by token address |
-| `--from-time <timestamp>` | Start time (unix seconds) |
-| `--to-time <timestamp>` | End time (unix seconds) |
-| `--remove-spam` | Remove spam activities |
-| `--amount <min>,<max>` | Filter by amount range |
-| `--flow <direction>` | Change direction: `in` \| `out` |
-| `--sort-order <order>` | `asc` \| `desc` (default: `desc`) |
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--token-account <account>` | Filter by specific token account | — |
+| `--token <address>` | Filter by token address | — |
+| `--from-time <timestamp>` | Start time (unix seconds) | — |
+| `--to-time <timestamp>` | End time (unix seconds) | — |
+| `--remove-spam` | Remove spam activities | off |
+| `--amount <min>,<max>` | Filter by amount range | — |
+| `--flow <direction>` | Change direction: `in` \| `out` | — |
+| `--sort-by <field>` | Sort field | `block_time` |
+| `--sort-order <order>` | Sort order: `asc` \| `desc` | `desc` |
+| `--page / --page-size` | Pagination | `1` / `10` (page_size: 10, 20, 30, 40, 60, 100) |
 | `--page / --page-size` | Pagination (page_size: 10, 20, 30, 40, 60, 100) |
 
 **Option details for `leaderboard`:**
@@ -568,6 +571,12 @@ solscan transaction actions --signature 5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJj
 
 # Batch lookup up to 50 transactions
 solscan transaction detail-multi --signatures sig1,sig2,sig3
+
+# Batch decode actions for multiple transactions
+solscan transaction actions-multi --signatures sig1,sig2,sig3
+
+# Get current network fee statistics
+solscan transaction fees
 ```
 
 ---
@@ -681,6 +690,18 @@ solscan block <action> [options]
 | `last` | Get the list of the latest blocks | — | `--limit` |
 | `detail` | Get block metadata by slot number | `--block` | — |
 | `transactions` | Get paginated transactions for a block | `--block` | `--page`, `--page-size`, `--exclude-vote`, `--program` |
+
+**Option details for `last`:**
+
+| Option | Description | Default | Valid Values |
+|--------|-------------|---------|--------------|
+| `--limit <number>` | Number of blocks to return | `10` | `10`, `20`, `30`, `40`, `60`, `100` |
+
+**Option details for `detail`:**
+
+| Option | Description | Valid Values |
+|--------|-------------|--------------|
+| `--block <slot>` | The slot index of a block (required) | — |
 
 **Option details for `transactions`:**
 

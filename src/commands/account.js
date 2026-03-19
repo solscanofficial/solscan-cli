@@ -28,7 +28,7 @@ export function registerAccountCommand(program) {
     .command('tokens')
     .description('Get token accounts of an account')
     .requiredOption('--address <address>', 'A wallet address on solana blockchain')
-    .option('--type <type>', 'Type of token: token | nft', 'token')
+    .requiredOption('--type <type>', 'Type of token: token | nft')
     .option('--page <number>', 'Page number', '1')
     .option('--page-size <number>', 'Items per page (10, 20, 30, 40)', '10')
     .option('--hide-zero', 'Filter tokens that have amount is zero')
@@ -159,6 +159,7 @@ export function registerAccountCommand(program) {
     .option('--token <address>', 'Filter activities data by token address')
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')
+    .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
     .option('--page <number>', 'Page number', '1')
     .option('--page-size <number>', 'Items per page (10, 20, 30, 40, 60, 100)', '10')
@@ -177,6 +178,7 @@ export function registerAccountCommand(program) {
       if (opts.token) params.token = opts.token;
       if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
       if (opts.toTime) params.to_time = parseInt(opts.toTime);
+      if (opts.sortBy) params.sort_by = opts.sortBy;
       if (opts.sortOrder) params.sort_order = opts.sortOrder;
 
       const data = await makeRequest('/account/defi/activities', params, { apiKey: root.apiKey });
@@ -194,8 +196,9 @@ export function registerAccountCommand(program) {
     .option('--token <address>', 'Filter activities data by token address')
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')
+    .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
-    .option('--output <file>', 'Save result as JSON to a file (e.g. out.json)')
+    .option('--output <file>', 'Save result as CSV to a file (e.g. out.csv)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const params = { address: opts.address };
@@ -207,6 +210,7 @@ export function registerAccountCommand(program) {
       if (opts.token) params.token = opts.token;
       if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
       if (opts.toTime) params.to_time = parseInt(opts.toTime);
+      if (opts.sortBy) params.sort_by = opts.sortBy;
       if (opts.sortOrder) params.sort_order = opts.sortOrder;
 
       const data = await makeRequest('/account/defi/activities/export', params, { apiKey: root.apiKey });
@@ -228,6 +232,7 @@ export function registerAccountCommand(program) {
     .option('--remove-spam', 'Remove spam activities from the result')
     .option('--amount <min>,<max>', 'Filter by amount range (e.g. 1,100)')
     .option('--flow <direction>', 'Filter by change direction: in | out')
+    .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
     .option('--page <number>', 'Page number', '1')
     .option('--page-size <number>', 'Items per page (10, 20, 30, 40, 60, 100)', '10')
@@ -249,6 +254,7 @@ export function registerAccountCommand(program) {
         params.amount = [parseFloat(min), parseFloat(max)];
       }
       if (opts.flow) params.flow = opts.flow;
+      if (opts.sortBy) params.sort_by = opts.sortBy;
       if (opts.sortOrder) params.sort_order = opts.sortOrder;
 
       const data = await makeRequest('/account/balance_change', params, { apiKey: root.apiKey });
