@@ -381,15 +381,16 @@ solscan token <action> [options]
 | `price` | Get current USD price of a token *(deprecated)* | `--address` | `--from-time`, `--to-time` |
 | `price-multi` | Get current USD prices for multiple tokens *(deprecated)* | `--addresses` | `--from-time`, `--to-time` |
 | `price-latest` | Get latest price of multiple tokens (max 50) | `--addresses` | — |
+| `price-history` | Get historical price of multiple tokens (max 50) | `--addresses` | `--from-time`, `--to-time` |
 | `markets` | Get DEX markets for one or two token addresses | `--token` | `--sort-by`, `--program`, `--page`, `--page-size` |
 | `trending` | Get currently trending tokens | — | `--limit` |
 | `list` | Get full token list sortable by holder, market cap, or creation time | — | `--page`, `--page-size`, `--sort-by`, `--sort-order` |
 | `top` | Get top tokens by market cap | — | — |
 | `latest` | Get newly listed tokens, filterable by launch platform | — | `--platform-id`, `--page`, `--page-size` |
-| `transfers` | Get transfer history for a token | `--address` | `--activity-type`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--amount`, `--value`, `--exclude-amount-zero`, `--sort-order`, `--page`, `--page-size` |
-| `defi` | Get DeFi activity involving a token | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-order`, `--page`, `--page-size` |
-| `defi-export` | Export DeFi activity history of a token as CSV | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-order`, `--output` |
-| `historical` | Get historical price data for a token (range: 7 or 30 days) | `--address` | `--range` |
+| `transfers` | Get transfer history for a token | `--address` | `--activity-type`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--amount`, `--value`, `--exclude-amount-zero`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
+| `defi` | Get DeFi activity involving a token | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
+| `defi-export` | Export DeFi activity history of a token as CSV | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--page`, `--page-size`, `--output` |
+| `historical` | Get historical data (price, supply, volume, holder, trader,...) for a token (range: 7 or 30 days) | `--address` | `--range` |
 | `search` | Search tokens by keyword, address, name, or symbol | `--keyword` | `--search-mode`, `--search-by`, `--exclude-unverified`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 
 **Option details for `holders`:**
@@ -425,10 +426,34 @@ solscan token <action> [options]
 | `--platform-id <platform>` | Filter by launch platform | — | `jupiter`, `raydium`, `orca`, `pumpfun`, `meteora`, `lifinity`, `sanctum`, `kamino`, `phoenix`, `openbook`, `apepro`, `stabble`, `jupiterdca`, `jupiter_limit_order`, `solfi`, `zerofi`, `letsbonkfun_launchpad`, `raydium_launchlab`, `believe_launchpad`, `moonshot_launchpad`, `jup_studio_launchpad`, `bags_launchpad` |
 | `--page / --page-size` | Pagination | `1` / `10` | page_size: `10`, `20`, `30`, `40`, `60`, `100` |
 
+**Option details for `price-history`:**
+
+| Option | Description | Default | Valid Values |
+|--------|-------------|---------|--------------|
+| `--addresses <addresses>` | Comma-separated token addresses (max 50) | required | — |
+| `--from-time <date>` | Start date for historical data | — | YYYYMMDD format |
+| `--to-time <date>` | End date for historical data | — | YYYYMMDD format |
+
+**Option details for `transfers` (token):**
+
+| Option | Description | Default | Valid Values |
+|--------|-------------|---------|--------------|
+| `--sort-by <field>` | Sort field | `block_time` | `block_time` |
+
+**Option details for `defi` (token):**
+
+| Option | Description | Default | Valid Values |
+|--------|-------------|---------|--------------|
+| `--sort-by <field>` | Sort field | `block_time` | `block_time` |
+
 **Option details for `defi-export` (token):**
 
 | Option | Description |
 |--------|-------------|
+| `--sort-by <field>` | Sort field (default: `block_time`) |
+| `--sort-order <order>` | Sort order: `asc` \| `desc` (default: `desc`) |
+| `--page <number>` | Page number (default: `1`) |
+| `--page-size <number>` | Items per page (default: `10`) |
 | `--output <file>` | Save the CSV response to a file (e.g. `out.csv`). Without this flag the raw CSV is printed to stdout. |
 
 **Option details for `historical`:**
@@ -460,6 +485,9 @@ solscan token meta --address So11111111111111111111111111111111111111112
 
 # Get latest price for multiple tokens
 solscan token price-latest --addresses So11111111111111111111111111111111111111112,EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+
+# Get historical price for multiple tokens
+solscan token price-history --addresses So11111111111111111111111111111111111111112,EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v --from-time 20240701 --to-time 20240715
 
 # Find all markets for a single token
 solscan token markets --token So11111111111111111111111111111111111111112

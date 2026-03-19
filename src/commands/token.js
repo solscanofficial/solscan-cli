@@ -89,6 +89,22 @@ export function registerTokenCommand(program) {
     });
 
   token
+    .command('price-history')
+    .description('Get the historical price of multiple tokens (max 50)')
+    .requiredOption('--addresses <addresses>', 'Comma-separated token addresses (max 50)')
+    .option('--from-time <date>', 'Start date (YYYYMMDD format)')
+    .option('--to-time <date>', 'End date (YYYYMMDD format)')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      const addressArray = opts.addresses.split(',').map(a => a.trim());
+      const params = { address: addressArray };
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
+      const data = await makeRequest('/token/price/history', params, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
+
+  token
     .command('markets')
     .description('Get token markets. Pass 1 token to search all markets; pass 2 tokens to search by pair')
     .requiredOption('--token <tokens>', 'Token address(es), comma-separated (1 or 2)')
@@ -176,6 +192,7 @@ export function registerTokenCommand(program) {
     .option('--amount <min>,<max>', 'Filter by amount range (e.g. 1,100)')
     .option('--value <min>,<max>', 'Filter by USD value range (e.g. 1,1000)')
     .option('--exclude-amount-zero', 'Excludes transfers that have amount is zero')
+    .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
     .option('--page <number>', 'Page number', '1')
     .option('--page-size <number>', 'Items per page (10, 20, 30, 40, 60, 100)', '10')
@@ -201,6 +218,7 @@ export function registerTokenCommand(program) {
         params.value = [parseFloat(min), parseFloat(max)];
       }
       if (opts.excludeAmountZero) params.exclude_amount_zero = true;
+      if (opts.sortBy) params.sort_by = opts.sortBy;
       if (opts.sortOrder) params.sort_order = opts.sortOrder;
 
       const data = await makeRequest('/token/transfer', params, { apiKey: root.apiKey });
@@ -218,6 +236,7 @@ export function registerTokenCommand(program) {
     .option('--token <address>', 'Filter activities data by token address')
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')
+    .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
     .option('--page <number>', 'Page number', '1')
     .option('--page-size <number>', 'Items per page (10, 20, 30, 40, 60, 100)', '10')
@@ -236,6 +255,7 @@ export function registerTokenCommand(program) {
       if (opts.token) params.token = opts.token;
       if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
       if (opts.toTime) params.to_time = parseInt(opts.toTime);
+      if (opts.sortBy) params.sort_by = opts.sortBy;
       if (opts.sortOrder) params.sort_order = opts.sortOrder;
 
       const data = await makeRequest('/token/defi/activities', params, { apiKey: root.apiKey });
@@ -253,11 +273,18 @@ export function registerTokenCommand(program) {
     .option('--token <address>', 'Filter activities data by token address')
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')
+    .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
+    .option('--page <number>', 'Page number', '1')
+    .option('--page-size <number>', 'Items per page (10, 20, 30, 40, 60, 100)', '10')
     .option('--output <file>', 'Save result to a csv file (e.g. out.csv)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
-      const params = { address: opts.address };
+      const params = {
+        address: opts.address,
+        page: parseInt(opts.page),
+        page_size: parseInt(opts.pageSize),
+      };
 
       if (opts.activityType) params.activity_type = opts.activityType.split(',');
       if (opts.from) params.from = opts.from;
@@ -266,6 +293,7 @@ export function registerTokenCommand(program) {
       if (opts.token) params.token = opts.token;
       if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
       if (opts.toTime) params.to_time = parseInt(opts.toTime);
+      if (opts.sortBy) params.sort_by = opts.sortBy;
       if (opts.sortOrder) params.sort_order = opts.sortOrder;
 
       const data = await makeRequest('/token/defi/activities/export', params, { apiKey: root.apiKey });
