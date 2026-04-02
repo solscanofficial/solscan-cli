@@ -31,8 +31,10 @@ export function registerTokenCommand(program) {
     .requiredOption('--address <address>', 'A token address on solana blockchain')
     .option('--page <number>', 'Page number', '1')
     .option('--page-size <number>', 'Items per page (10, 20, 30, 40)', '10')
-    .option('--from-amount <amount>', 'Filter holders by minimum token holding amount')
-    .option('--to-amount <amount>', 'Filter holders by maximum token holding amount')
+    .option('--from-amount <amount>', 'Filter holders by minimum token holding amount (string format)')
+    .option('--to-amount <amount>', 'Filter holders by maximum token holding amount (string format)')
+    .option('--from-value <value>', 'Filter holders by minimum token holding value (USD)')
+    .option('--to-value <value>', 'Filter holders by maximum token holding value (USD)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const params = {
@@ -42,6 +44,8 @@ export function registerTokenCommand(program) {
       };
       if (opts.fromAmount) params.from_amount = opts.fromAmount;
       if (opts.toAmount) params.to_amount = opts.toAmount;
+      if (opts.fromValue) params.from_value = parseFloat(opts.fromValue);
+      if (opts.toValue) params.to_value = parseFloat(opts.toValue);
       const data = await makeRequest('/token/holders', params, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });

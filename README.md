@@ -380,7 +380,7 @@ solscan token <action> [options]
 |--------|-------------|----------|---------|
 | `meta` | Get name, symbol, decimals, and supply of a token | `--address` | — |
 | `meta-multi` | Get metadata of multiple tokens (max 50) | `--addresses` | — |
-| `holders` | Get top holder list with amounts for a token | `--address` | `--page`, `--page-size`, `--from-amount`, `--to-amount` |
+| `holders` | Get top holder list with amounts for a token | `--address` | `--page`, `--page-size`, `--from-amount`, `--to-amount`, `--from-value`, `--to-value` |
 | `price` | Get current USD price of a token *(deprecated)* | `--address` | `--from-time`, `--to-time` |
 | `price-multi` | Get current USD prices for multiple tokens *(deprecated)* | `--addresses` | `--from-time`, `--to-time` |
 | `price-latest` | Get latest price of multiple tokens (max 50) | `--addresses` | — |
@@ -402,8 +402,10 @@ solscan token <action> [options]
 |--------|-------------|---------|--------------|
 | `--page <number>` | Page number | `1` | — |
 | `--page-size <number>` | Items per page | `10` | `10`, `20`, `30`, `40` |
-| `--from-amount <amount>` | Minimum token holding amount | — | — |
-| `--to-amount <amount>` | Maximum token holding amount | — | — |
+| `--from-amount <amount>` | Minimum token holding amount (string format) | — | — |
+| `--to-amount <amount>` | Maximum token holding amount (string format) | — | — |
+| `--from-value <value>` | Minimum token holding value (USD) | — | — |
+| `--to-value <value>` | Maximum token holding value (USD) | — | — |
 
 **Option details for `markets`:**
 
@@ -957,6 +959,9 @@ solscan token price-latest --addresses <MINT>
 
 # Step 3: Check holder concentration (filter by large holders)
 solscan token holders --address <MINT> --from-amount 1000000 --page-size 20
+
+# Step 3b: Filter holders by USD value (e.g., holders with $10k-$100k worth)
+solscan token holders --address <MINT> --from-value 10000 --to-value 100000
 
 # Step 4: Find best liquidity pools
 solscan token markets --token <MINT> --sort-by tvl
