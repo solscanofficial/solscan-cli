@@ -2,7 +2,7 @@
 
 Command-line tool for querying Solana blockchain data via the [Solscan Pro API v2.0](https://pro-api.solscan.io/pro-api-docs/v2.0).
 
-Supports 55+ actions across accounts, tokens, transactions, NFTs, blocks, markets, programs, and API monitoring — with JSON and human-readable output modes.
+Supports 56+ actions across accounts, tokens, transactions, NFTs, blocks, markets, programs, and API monitoring — with JSON and human-readable output modes.
 
 ---
 
@@ -185,6 +185,7 @@ solscan account <action> [options]
 | `transfer-export` | Export transfer history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--activity-type`, `--token-account`, `--from`, `--to`, `--token`, `--amount`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow`, `--output` |
 | `metadata` | Get label, icon, tags, domain, and funder of an account | `--address` | — |
 | `metadata-multi` | Get metadata of multiple accounts (max 50) | `--addresses` | — |
+| `funded-by` | Get funder accounts for multiple accounts (max 50) | `--addresses` | — |
 | `leaderboard` | Get top accounts ranked by portfolio value | — | `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 
 **Option details for `tokens`:**
@@ -364,6 +365,9 @@ solscan account leaderboard --sort-by total_values --sort-order desc --page-size
 
 # Batch metadata for multiple accounts (max 50)
 solscan account metadata-multi --addresses addr1,addr2,addr3
+
+# Get funders for multiple accounts (max 50)
+solscan account funded-by --addresses addr1,addr2,addr3
 ```
 
 ---
@@ -1018,7 +1022,7 @@ solscan-cli/
 │   ├── api.js                  # Axios HTTP client & error handling
 │   ├── formatter.js            # JSON / human-readable output formatter
 │   └── commands/
-│       ├── account.js          # 15 account actions
+│       ├── account.js          # 16 account actions
 │       ├── token.js            # 16 token actions
 │       ├── transaction.js      # 6 transaction actions
 │       ├── nft.js              # 4 NFT actions

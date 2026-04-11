@@ -361,4 +361,15 @@ export function registerAccountCommand(program) {
       const data = await makeRequest('/account/leaderboard', params, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });
+
+  account
+    .command('funded-by')
+    .description('Get funder accounts for multiple accounts (max 50)')
+    .requiredOption('--addresses <addresses>', 'Comma-separated wallet addresses (max 50)')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      const addressArray = opts.addresses.split(',').map(a => a.trim());
+      const data = await makeRequest('/account/funded-by', { address: addressArray }, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
 }
