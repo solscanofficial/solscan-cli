@@ -2,7 +2,7 @@
 
 Command-line tool for querying Solana blockchain data via the [Solscan Pro API v2.0](https://pro-api.solscan.io/pro-api-docs/v2.0).
 
-Supports 56+ actions across accounts, tokens, transactions, NFTs, blocks, markets, programs, and API monitoring — with JSON and human-readable output modes.
+Supports 57+ actions across accounts, tokens, transactions, NFTs, blocks, markets, programs, and API monitoring — with JSON and human-readable output modes.
 
 ---
 
@@ -750,6 +750,7 @@ solscan market <action> [options]
 | `list` | Get the list of all trading pools and markets | — | `--page`, `--page-size`, `--program`, `--token-address`, `--sort-by`, `--sort-order` |
 | `info` | Get pool and market details by market address | `--address` | — |
 | `volume` | Get historical volume data for a market | `--address` | `--time` |
+| `positions` | Get market positions | `--address` | `--page`, `--page-size`, `--sort-by`, `--sort-order`, `--in-range` |
 
 **Option details for `list`:**
 
@@ -767,6 +768,17 @@ solscan market <action> [options]
 |--------|-------------|
 | `--address <address>` | Market ID (required) |
 | `--time <start>,<end>` | Time range in YYYYMMDD format (e.g. `20240701,20240715`) |
+
+**Option details for `positions`:**
+
+| Option | Description | Default | Valid Values |
+|--------|-------------|---------|--------------|
+| `--address <address>` | Market ID (required) | required | — |
+| `--page <number>` | Page number | `1` | — |
+| `--page-size <number>` | Items per page | `10` | `10`, `20`, `30`, `40` |
+| `--sort-by <field>` | Sort field | `position_value` | `position_value`, `created_time` |
+| `--sort-order <order>` | Sort order | `desc` | `asc`, `desc` |
+| `--in-range` | Filter positions that are in range | off | — |
 
 **Examples:**
 
@@ -786,6 +798,14 @@ solscan market volume --address 8BnEgHoWFysVcuFFX7QztDmzuH8r5ZFvyP3sYwn1XTh
 # Get volume for a specific date range
 solscan market volume --address 8BnEgHoWFysVcuFFX7QztDmzuH8r5ZFvyP3sYwn1XTh \
   --time 20240701,20240715
+
+# Get market positions sorted by position value
+solscan market positions --address 939z7rR7etdm9W6rC2MHcrHXWEA3jJxMwDLzfD1qSvju \
+  --sort-by position_value --sort-order desc
+
+# Get in-range positions only
+solscan market positions --address 939z7rR7etdm9W6rC2MHcrHXWEA3jJxMwDLzfD1qSvju \
+  --in-range --page-size 20
 ```
 
 ---
@@ -1027,7 +1047,7 @@ solscan-cli/
 │       ├── transaction.js      # 6 transaction actions
 │       ├── nft.js              # 4 NFT actions
 │       ├── block.js            # 3 block actions
-│       ├── market.js           # 3 market actions
+│       ├── market.js           # 4 market actions
 │       ├── program.js          # 3 program actions
 │       └── monitor.js          # 1 monitor action
 ├── package.json
