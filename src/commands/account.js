@@ -372,4 +372,47 @@ export function registerAccountCommand(program) {
       const data = await makeRequest('/account/funded-by', { address: addressArray }, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });
+
+  account
+    .command('transfer-total')
+    .description('Get total transfer count for an account')
+    .requiredOption('--address <address>', 'Solana wallet address')
+    .option('--token-account <account>', 'Filter transfers for a specific token account in the wallet')
+    .option('--from <addresses>', 'Source addresses, comma-separated (max 5)')
+    .option('--exclude-from <addresses>', 'Exclude source addresses, comma-separated (max 5)')
+    .option('--to <addresses>', 'Destination addresses, comma-separated (max 5)')
+    .option('--exclude-to <addresses>', 'Exclude destination addresses, comma-separated (max 5)')
+    .option('--token <tokens>', 'Token addresses, comma-separated (max 5). Use So11111111111111111111111111111111111111111 for native SOL')
+    .option('--amount <min>,<max>', 'Filter by amount range (e.g. 1,100)')
+    .option('--value <min>,<max>', 'Filter by USD value range (e.g. 1,1000)')
+    .option('--from-time <timestamp>', 'Start time (unix seconds). Default: 3 weeks ago')
+    .option('--to-time <timestamp>', 'End time (unix seconds)')
+    .option('--exclude-amount-zero', 'Exclude transfers with zero amount')
+    .option('--flow <direction>', 'Filter by transfer direction: in | out')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      const params = { address: opts.address };
+
+      if (opts.tokenAccount) params.token_account = opts.tokenAccount;
+      if (opts.from) params.from = opts.from;
+      if (opts.excludeFrom) params.exclude_from = opts.excludeFrom;
+      if (opts.to) params.to = opts.to;
+      if (opts.excludeTo) params.exclude_to = opts.excludeTo;
+      if (opts.token) params.token = opts.token;
+      if (opts.amount) {
+        const [min, max] = opts.amount.split(',');
+        params.amount = [parseFloat(min), parseFloat(max)];
+      }
+      if (opts.value) {
+        const [min, max] = opts.value.split(',');
+        params.value = [parseFloat(min), parseFloat(max)];
+      }
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
+      if (opts.excludeAmountZero) params.exclude_amount_zero = true;
+      if (opts.flow) params.flow = opts.flow;
+
+      const data = await makeRequest('/account/transfer/total', params, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
 }

@@ -2,7 +2,7 @@
 
 Command-line tool for querying Solana blockchain data via the [Solscan Pro API v2.0](https://pro-api.solscan.io/pro-api-docs/v2.0).
 
-Supports 57+ actions across accounts, tokens, transactions, NFTs, blocks, markets, programs, and API monitoring — with JSON and human-readable output modes.
+Supports 58+ actions across accounts, tokens, transactions, NFTs, blocks, markets, programs, and API monitoring — with JSON and human-readable output modes.
 
 ---
 
@@ -186,6 +186,7 @@ solscan account <action> [options]
 | `metadata` | Get label, icon, tags, domain, and funder of an account | `--address` | — |
 | `metadata-multi` | Get metadata of multiple accounts (max 50) | `--addresses` | — |
 | `funded-by` | Get funder accounts for multiple accounts (max 50) | `--addresses` | — |
+| `transfer-total` | Get total transfer count for an account | `--address` | `--token-account`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--token`, `--amount`, `--value`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow` |
 | `leaderboard` | Get top accounts ranked by portfolio value | — | `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 
 **Option details for `tokens`:**
@@ -297,6 +298,23 @@ All export commands accept an additional option:
 | `--page / --page-size` | Pagination | `1` / `10` (page_size: 10, 20, 30, 40, 60, 100) |
 | `--page / --page-size` | Pagination (page_size: 10, 20, 30, 40, 60, 100) |
 
+**Option details for `transfer-total`:**
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--token-account <account>` | Filter by specific token account in wallet | — |
+| `--from <addresses>` | Source addresses, comma-separated (max 5) | — |
+| `--exclude-from <addresses>` | Exclude source addresses, comma-separated (max 5) | — |
+| `--to <addresses>` | Destination addresses, comma-separated (max 5) | — |
+| `--exclude-to <addresses>` | Exclude destination addresses, comma-separated (max 5) | — |
+| `--token <tokens>` | Token addresses, comma-separated (max 5) | — |
+| `--amount <min>,<max>` | Filter by amount range | — |
+| `--value <min>,<max>` | Filter by USD value range | — |
+| `--from-time <timestamp>` | Start time (unix seconds) | 3 weeks ago |
+| `--to-time <timestamp>` | End time (unix seconds) | — |
+| `--exclude-amount-zero` | Exclude zero amount transfers | off |
+| `--flow <direction>` | Transfer direction: `in` \| `out` | — |
+
 **Option details for `leaderboard`:**
 
 | Option | Description | Default | Valid Values |
@@ -368,6 +386,13 @@ solscan account metadata-multi --addresses addr1,addr2,addr3
 
 # Get funders for multiple accounts (max 50)
 solscan account funded-by --addresses addr1,addr2,addr3
+
+# Get total transfer count for an account
+solscan account transfer-total --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
+
+# Get total incoming USDC transfers
+solscan account transfer-total --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
+  --flow in --token EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 ```
 
 ---
@@ -1042,7 +1067,7 @@ solscan-cli/
 │   ├── api.js                  # Axios HTTP client & error handling
 │   ├── formatter.js            # JSON / human-readable output formatter
 │   └── commands/
-│       ├── account.js          # 16 account actions
+│       ├── account.js          # 17 account actions
 │       ├── token.js            # 16 token actions
 │       ├── transaction.js      # 6 transaction actions
 │       ├── nft.js              # 4 NFT actions
