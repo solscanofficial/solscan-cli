@@ -195,6 +195,8 @@ export function registerTokenCommand(program) {
     .option('--exclude-to <addresses>', 'Exclude destination addresses, comma-separated (max 5)')
     .option('--amount <min>,<max>', 'Filter by amount range (e.g. 1,100)')
     .option('--value <min>,<max>', 'Filter by USD value range (e.g. 1,1000)')
+    .option('--from-time <timestamp>', 'Start time (unix seconds)')
+    .option('--to-time <timestamp>', 'End time (unix seconds)')
     .option('--exclude-amount-zero', 'Excludes transfers that have amount is zero')
     .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
@@ -221,6 +223,8 @@ export function registerTokenCommand(program) {
         const [min, max] = opts.value.split(',');
         params.value = [parseFloat(min), parseFloat(max)];
       }
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
       if (opts.excludeAmountZero) params.exclude_amount_zero = true;
       if (opts.sortBy) params.sort_by = opts.sortBy;
       if (opts.sortOrder) params.sort_order = opts.sortOrder;
@@ -235,9 +239,9 @@ export function registerTokenCommand(program) {
     .requiredOption('--address <address>', 'A token address on solana blockchain')
     .option('--activity-type <types>', 'Comma-separated DeFi activity types (e.g. ACTIVITY_TOKEN_SWAP,ACTIVITY_TOKEN_ADD_LIQ)')
     .option('--from <address>', 'Filter activities from an address')
-    .option('--platform <addresses>', 'Comma-separated platform addresses (max 5)')
     .option('--source <addresses>', 'Comma-separated source addresses (max 5)')
     .option('--token <address>', 'Filter activities data by token address')
+    .option('--value <min>,<max>', 'Filter by USD value range (e.g. 1,1000)')
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')
     .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
@@ -254,9 +258,12 @@ export function registerTokenCommand(program) {
 
       if (opts.activityType) params.activity_type = opts.activityType.split(',');
       if (opts.from) params.from = opts.from;
-      if (opts.platform) params.platform = opts.platform.split(',');
       if (opts.source) params.source = opts.source.split(',');
       if (opts.token) params.token = opts.token;
+      if (opts.value) {
+        const [min, max] = opts.value.split(',');
+        params.value = [parseFloat(min), parseFloat(max)];
+      }
       if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
       if (opts.toTime) params.to_time = parseInt(opts.toTime);
       if (opts.sortBy) params.sort_by = opts.sortBy;
@@ -279,15 +286,11 @@ export function registerTokenCommand(program) {
     .option('--to-time <timestamp>', 'End time (unix seconds)')
     .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
-    .option('--page <number>', 'Page number', '1')
-    .option('--page-size <number>', 'Items per page (10, 20, 30, 40, 60, 100)', '10')
     .option('--output <file>', 'Save result to a csv file (e.g. out.csv)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const params = {
         address: opts.address,
-        page: parseInt(opts.page),
-        page_size: parseInt(opts.pageSize),
       };
 
       if (opts.activityType) params.activity_type = opts.activityType.split(',');

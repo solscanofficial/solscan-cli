@@ -136,6 +136,29 @@ export function registerAccountCommand(program) {
     });
 
   account
+    .command('stake-rewards')
+    .description('Get stake rewards for an account')
+    .requiredOption('--address <address>', 'A stake account on Solana')
+    .option('--from-time <timestamp>', 'Start time (unix seconds). Default: 1 month before to_time')
+    .option('--to-time <timestamp>', 'End time (unix seconds). Defaults to the current time')
+    .option('--page <number>', 'Page number', '1')
+    .option('--page-size <number>', 'Items per page (10, 20, 30, 40, 60, 100)', '10')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      const params = {
+        address: opts.address,
+        page: parseInt(opts.page),
+        page_size: parseInt(opts.pageSize),
+      };
+
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
+
+      const data = await makeRequest('/account/stake/reward', params, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
+
+  account
     .command('portfolio')
     .description('Get the portfolio for a given address')
     .requiredOption('--address <address>', 'A wallet address on solana blockchain')
@@ -154,9 +177,9 @@ export function registerAccountCommand(program) {
     .requiredOption('--address <address>', 'A wallet address on solana blockchain')
     .option('--activity-type <types>', 'Comma-separated DeFi activity types (e.g. ACTIVITY_TOKEN_SWAP,ACTIVITY_TOKEN_ADD_LIQ)')
     .option('--from <address>', 'Filter activities from an address')
-    .option('--platform <addresses>', 'Comma-separated platform addresses (max 5)')
     .option('--source <addresses>', 'Comma-separated source addresses (max 5)')
     .option('--token <address>', 'Filter activities data by token address')
+    .option('--value <min>,<max>', 'Filter by USD value range (e.g. 1,1000)')
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')
     .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
@@ -173,9 +196,12 @@ export function registerAccountCommand(program) {
 
       if (opts.activityType) params.activity_type = opts.activityType.split(',');
       if (opts.from) params.from = opts.from;
-      if (opts.platform) params.platform = opts.platform.split(',');
       if (opts.source) params.source = opts.source.split(',');
       if (opts.token) params.token = opts.token;
+      if (opts.value) {
+        const [min, max] = opts.value.split(',');
+        params.value = [parseFloat(min), parseFloat(max)];
+      }
       if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
       if (opts.toTime) params.to_time = parseInt(opts.toTime);
       if (opts.sortBy) params.sort_by = opts.sortBy;
@@ -194,6 +220,7 @@ export function registerAccountCommand(program) {
     .option('--platform <addresses>', 'Comma-separated platform addresses (max 5)')
     .option('--source <addresses>', 'Comma-separated source addresses (max 5)')
     .option('--token <address>', 'Filter activities data by token address')
+    .option('--value <min>,<max>', 'Filter by USD value range (e.g. 1,1000)')
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')
     .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
@@ -208,6 +235,10 @@ export function registerAccountCommand(program) {
       if (opts.platform) params.platform = opts.platform.split(',');
       if (opts.source) params.source = opts.source.split(',');
       if (opts.token) params.token = opts.token;
+      if (opts.value) {
+        const [min, max] = opts.value.split(',');
+        params.value = [parseFloat(min), parseFloat(max)];
+      }
       if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
       if (opts.toTime) params.to_time = parseInt(opts.toTime);
       if (opts.sortBy) params.sort_by = opts.sortBy;
@@ -263,16 +294,16 @@ export function registerAccountCommand(program) {
 
   account
     .command('reward-export')
-    .description('Export stake rewards for an account. Max 5000 items. Default: last 1 month. Max 1 request per minute.')
+    .description('Export stake rewards for an account. Max 5000 items. Default: last 1 month. Max 1 request per minute. Data available from epoch 132')
     .requiredOption('--address <address>', 'A wallet address on solana blockchain')
-    .option('--time-from <timestamp>', 'Start time (unix seconds). Default: 1 month before time-to')
-    .option('--time-to <timestamp>', 'End time (unix seconds). Default: current time')
+    .option('--from-time <timestamp>', 'Start time (unix seconds). Default: 1 month before to_time')
+    .option('--to-time <timestamp>', 'End time (unix seconds). Default: current time')
     .option('--output <file>', 'Save result to a csv file (e.g. out.csv)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const params = { address: opts.address };
-      if (opts.timeFrom) params.time_from = parseInt(opts.timeFrom);
-      if (opts.timeTo) params.time_to = parseInt(opts.timeTo);
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
       const data = await makeRequest('/account/reward/export', params, { apiKey: root.apiKey });
       if (opts.output) {
         saveToCsv(opts.output, data);
@@ -375,8 +406,9 @@ export function registerAccountCommand(program) {
 
   account
     .command('transfer-total')
-    .description('Get total transfer count for an account')
+    .description('Get total transfer count for an account (hard-capped at 10 million records)')
     .requiredOption('--address <address>', 'Solana wallet address')
+    .option('--activity-type <types>', 'Comma-separated activity types (e.g. ACTIVITY_SPL_TRANSFER,ACTIVITY_SPL_BURN)')
     .option('--token-account <account>', 'Filter transfers for a specific token account in the wallet')
     .option('--from <addresses>', 'Source addresses, comma-separated (max 5)')
     .option('--exclude-from <addresses>', 'Exclude source addresses, comma-separated (max 5)')
@@ -393,6 +425,7 @@ export function registerAccountCommand(program) {
       const root = cmd.optsWithGlobals();
       const params = { address: opts.address };
 
+      if (opts.activityType) params.activity_type = opts.activityType.split(',');
       if (opts.tokenAccount) params.token_account = opts.tokenAccount;
       if (opts.from) params.from = opts.from;
       if (opts.excludeFrom) params.exclude_from = opts.excludeFrom;

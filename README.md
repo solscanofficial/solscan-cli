@@ -177,16 +177,17 @@ solscan account <action> [options]
 | `transactions` | Get recent transactions for an address (cursor-based pagination) | `--address` | `--before`, `--limit` |
 | `transfers` | Get SPL and SOL transfer history of an account | `--address` | `--activity-type`, `--token-account`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--token`, `--amount`, `--value`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow`, `--sort-order`, `--page`, `--page-size` |
 | `stake` | Get active stake accounts of an address | `--address` | `--page`, `--page-size`, `--sort-by`, `--sort-order` |
+| `stake-rewards` | Get stake rewards for an account | `--address` | `--from-time`, `--to-time`, `--page`, `--page-size` |
 | `portfolio` | Get token holdings with USD value for an address | `--address` | `--exclude-low-score-tokens` |
-| `defi` | Get DeFi protocol interactions of an account | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
-| `defi-export` | Export DeFi activity history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--output` |
+| `defi` | Get DeFi protocol interactions of an account | `--address` | `--activity-type`, `--from`, `--source`, `--token`, `--value`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
+| `defi-export` | Export DeFi activity history as CSV (max 5000 rows, max 10 req/min) | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--value`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--output` |
 | `balance-change` | Get historical balance changes for an account | `--address` | `--token-account`, `--token`, `--from-time`, `--to-time`, `--remove-spam`, `--amount`, `--flow`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
-| `reward-export` | Export staking reward history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--time-from`, `--time-to`, `--output` |
-| `transfer-export` | Export transfer history as CSV (max 5000 rows, max 1 req/min) | `--address` | `--activity-type`, `--token-account`, `--from`, `--to`, `--token`, `--amount`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow`, `--output` |
+| `reward-export` | Export staking reward history as CSV (max 5000 rows, max 10 req/min). Default: past 1 month. Data available from epoch 132 | `--address` | `--from-time`, `--to-time`, `--output` |
+| `transfer-export` | Export transfer history as CSV (max 5000 rows, max 10 req/min) | `--address` | `--activity-type`, `--token-account`, `--from`, `--to`, `--token`, `--amount`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow`, `--output` |
 | `metadata` | Get label, icon, tags, domain, and funder of an account | `--address` | — |
 | `metadata-multi` | Get metadata of multiple accounts (max 50) | `--addresses` | — |
 | `funded-by` | Get funder accounts for multiple accounts (max 50) | `--addresses` | — |
-| `transfer-total` | Get total transfer count for an account | `--address` | `--token-account`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--token`, `--amount`, `--value`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow` |
+| `transfer-total` | Get total transfer count for an account (hard-capped at 10 million records) | `--address` | `--activity-type`, `--token-account`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--token`, `--amount`, `--value`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow` |
 | `leaderboard` | Get top accounts ranked by portfolio value | — | `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 
 **Option details for `tokens`:**
@@ -229,12 +230,13 @@ solscan account <action> [options]
 **Transfer activity types:**
 
 ```
-ACTIVITY_SPL_TRANSFER         ACTIVITY_SPL_BURN
-ACTIVITY_SPL_MINT             ACTIVITY_SPL_CREATE_ACCOUNT
-ACTIVITY_SPL_CLOSE_ACCOUNT    ACTIVITY_SPL_TOKEN_WITHDRAW_STAKE
-ACTIVITY_SPL_TOKEN_SPLIT_STAKE  ACTIVITY_SPL_TOKEN_MERGE_STAKE
-ACTIVITY_SPL_VOTE_WITHDRAW    ACTIVITY_SPL_SET_OWNER_AUTHORITY
-ACTIVITY_SPL_WITHDRAW_FROM_NONCE
+ACTIVITY_SPL_TRANSFER                  ACTIVITY_SPL_BURN
+ACTIVITY_SPL_MINT                      ACTIVITY_SPL_CREATE_ACCOUNT
+ACTIVITY_SPL_CLOSE_ACCOUNT             ACTIVITY_SPL_TOKEN_WITHDRAW_STAKE
+ACTIVITY_SPL_TOKEN_SPLIT_STAKE         ACTIVITY_SPL_TOKEN_MERGE_STAKE
+ACTIVITY_SPL_VOTE_WITHDRAW             ACTIVITY_SPL_SET_OWNER_AUTHORITY
+ACTIVITY_SPL_WITHDRAW_FROM_NONCE       ACTIVITY_SPL_WITHDRAW_EXCESS_LAMPORTS
+ACTIVITY_SPL_UNWRAP_LAMPORTS
 ```
 
 **Option details for `stake`:**
@@ -246,15 +248,24 @@ ACTIVITY_SPL_WITHDRAW_FROM_NONCE
 | `--sort-by <field>` | Sort field | `active_stake` | `active_stake`, `delegated_stake` |
 | `--sort-order <order>` | Sort order | — | `asc`, `desc` |
 
+**Option details for `stake-rewards`:**
+
+| Option | Description | Default | Valid Values |
+|--------|-------------|---------|--------------|
+| `--from-time <timestamp>` | Start time (unix seconds) | 1 month before to_time | — |
+| `--to-time <timestamp>` | End time (unix seconds) | Current time | — |
+| `--page <number>` | Page number | `1` | — |
+| `--page-size <number>` | Items per page | `10` | `10`, `20`, `30`, `40`, `60`, `100` |
+
 **Option details for `defi`:**
 
 | Option | Description | Default |
 |--------|-------------|---------|
 | `--activity-type <types>` | Comma-separated DeFi activity types | — |
 | `--from <address>` | Filter activities from an address | — |
-| `--platform <addresses>` | Comma-separated platform addresses (max 5) | — |
 | `--source <addresses>` | Comma-separated source addresses (max 5) | — |
 | `--token <address>` | Filter by token address | — |
+| `--value <min>,<max>` | Filter by USD value range (e.g. 1,1000) | — |
 | `--from-time <timestamp>` | Start time (unix seconds) | — |
 | `--to-time <timestamp>` | End time (unix seconds) | — |
 | `--sort-by <field>` | Sort field | `block_time` |
@@ -275,7 +286,15 @@ ACTIVITY_REPAY_BORROWING      ACTIVITY_LIQUIDATE_BORROWING
 ACTIVITY_BRIDGE_ORDER_IN      ACTIVITY_BRIDGE_ORDER_OUT
 ```
 
-**Option details for `defi-export`, `reward-export`, `transfer-export`:**
+**Option details for `reward-export`:**
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--from-time <timestamp>` | Start time (unix seconds) | 1 month before to_time |
+| `--to-time <timestamp>` | End time (unix seconds) | Current time |
+| `--output <file>` | Save the CSV response to a file (e.g. `out.csv`). Without this flag the raw CSV is printed to stdout | — |
+
+**Option details for `defi-export`, `transfer-export`:**
 
 All export commands accept an additional option:
 
@@ -303,6 +322,7 @@ All export commands accept an additional option:
 
 | Option | Description | Default |
 |--------|-------------|---------|
+| `--activity-type <types>` | Comma-separated transfer activity types | — |
 | `--token-account <account>` | Filter by specific token account in wallet | — |
 | `--from <addresses>` | Source addresses, comma-separated (max 5) | — |
 | `--exclude-from <addresses>` | Exclude source addresses, comma-separated (max 5) | — |
@@ -315,6 +335,17 @@ All export commands accept an additional option:
 | `--to-time <timestamp>` | End time (unix seconds) | — |
 | `--exclude-amount-zero` | Exclude zero amount transfers | off |
 | `--flow <direction>` | Transfer direction: `in` \| `out` | — |
+
+**Transfer activity types for `transfer-total`:**
+
+```
+ACTIVITY_SPL_TRANSFER                  ACTIVITY_SPL_BURN
+ACTIVITY_SPL_MINT                      ACTIVITY_SPL_CREATE_ACCOUNT
+ACTIVITY_SPL_CLOSE_ACCOUNT             ACTIVITY_SPL_TOKEN_WITHDRAW_STAKE
+ACTIVITY_SPL_TOKEN_SPLIT_STAKE         ACTIVITY_SPL_TOKEN_MERGE_STAKE
+ACTIVITY_SPL_VOTE_WITHDRAW             ACTIVITY_SPL_SET_OWNER_AUTHORITY
+ACTIVITY_SPL_WITHDRAW_EXCESS_LAMPORTS  ACTIVITY_SPL_UNWRAP_LAMPORTS
+```
 
 **Option details for `leaderboard`:**
 
@@ -361,7 +392,7 @@ solscan account reward-export --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYt
 
 # Export rewards for a specific time range
 solscan account reward-export --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
-  --time-from 1700000000 --time-to 1702678400
+  --from-time 1700000000 --to-time 1702678400
 
 # Export rewards and save to CSV file
 solscan account reward-export --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
@@ -379,6 +410,17 @@ solscan account transfer-export --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9z
 solscan account stake --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
   --sort-by delegated_stake --sort-order desc
 
+# Get stake rewards for an account
+solscan account stake-rewards --address BhxVb6ufeLGqcYCRKvKh9N3DgGapB6zZwzz2c7B7X4ke
+
+# Get stake rewards for a specific time range
+solscan account stake-rewards --address BhxVb6ufeLGqcYCRKvKh9N3DgGapB6zZwzz2c7B7X4ke \
+  --from-time 1700000000 --to-time 1702678400
+
+# Get stake rewards with pagination
+solscan account stake-rewards --address BhxVb6ufeLGqcYCRKvKh9N3DgGapB6zZwzz2c7B7X4ke \
+  --page 1 --page-size 20
+
 # Leaderboard sorted by total portfolio value
 solscan account leaderboard --sort-by total_values --sort-order desc --page-size 20
 
@@ -394,6 +436,10 @@ solscan account transfer-total --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zY
 # Get total incoming USDC transfers
 solscan account transfer-total --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
   --flow in --token EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+
+# Get total SPL transfer count
+solscan account transfer-total --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
+  --activity-type ACTIVITY_SPL_TRANSFER
 ```
 
 ---
@@ -420,9 +466,9 @@ solscan token <action> [options]
 | `list` | Get full token list sortable by holder, market cap, or creation time | — | `--page`, `--page-size`, `--sort-by`, `--sort-order` |
 | `top` | Get top tokens by market cap | — | — |
 | `latest` | Get newly listed tokens, filterable by launch platform | — | `--platform-id`, `--page`, `--page-size` |
-| `transfers` | Get transfer history for a token | `--address` | `--activity-type`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--amount`, `--value`, `--exclude-amount-zero`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
-| `defi` | Get DeFi activity involving a token | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
-| `defi-export` | Export DeFi activity history of a token as CSV | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--page`, `--page-size`, `--output` |
+| `transfers` | Get transfer history for a token | `--address` | `--activity-type`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--amount`, `--value`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
+| `defi` | Get DeFi activity involving a token | `--address` | `--activity-type`, `--from`, `--source`, `--token`, `--value`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
+| `defi-export` | Export DeFi activity history of a token as CSV (max 5000 items per request, max 10 req/min) | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--output` |
 | `historical` | Get historical data (price, supply, volume, holder, trader,...) for a token (range: 7 or 30 days) | `--address` | `--range` |
 | `search` | Search tokens by keyword, address, name, or symbol | `--keyword` | `--search-mode`, `--search-by`, `--exclude-unverified`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 
@@ -471,25 +517,53 @@ solscan token <action> [options]
 
 **Option details for `transfers` (token):**
 
-| Option | Description | Default | Valid Values |
-|--------|-------------|---------|--------------|
-| `--sort-by <field>` | Sort field | `block_time` | `block_time` |
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--activity-type <types>` | Comma-separated activity types | — |
+| `--from <addresses>` | Source addresses, comma-separated (max 5) | — |
+| `--exclude-from <addresses>` | Exclude source addresses, comma-separated (max 5) | — |
+| `--to <addresses>` | Destination addresses, comma-separated (max 5) | — |
+| `--exclude-to <addresses>` | Exclude destination addresses, comma-separated (max 5) | — |
+| `--amount <min>,<max>` | Filter by amount range | — |
+| `--value <min>,<max>` | Filter by USD value range | — |
+| `--from-time <timestamp>` | Start time (unix seconds) | — |
+| `--to-time <timestamp>` | End time (unix seconds) | — |
+| `--exclude-amount-zero` | Exclude zero amount transfers | off |
+| `--sort-by <field>` | Sort field | `block_time` |
+| `--sort-order <order>` | Sort order: `asc` \| `desc` | `desc` |
+| `--page <number>` | Page number | `1` |
+| `--page-size <number>` | Items per page | `10` |
 
 **Option details for `defi` (token):**
 
-| Option | Description | Default | Valid Values |
-|--------|-------------|---------|--------------|
-| `--sort-by <field>` | Sort field | `block_time` | `block_time` |
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--activity-type <types>` | Comma-separated DeFi activity types | — |
+| `--from <address>` | Filter activities from an address | — |
+| `--source <addresses>` | Comma-separated source addresses (max 5) | — |
+| `--token <address>` | Filter activities by token address | — |
+| `--value <min>,<max>` | Filter by USD value range | — |
+| `--from-time <timestamp>` | Start time (unix seconds) | — |
+| `--to-time <timestamp>` | End time (unix seconds) | — |
+| `--sort-by <field>` | Sort field | `block_time` |
+| `--sort-order <order>` | Sort order: `asc` \| `desc` | `desc` |
+| `--page <number>` | Page number | `1` |
+| `--page-size <number>` | Items per page | `10` |
 
 **Option details for `defi-export` (token):**
 
-| Option | Description |
-|--------|-------------|
-| `--sort-by <field>` | Sort field (default: `block_time`) |
-| `--sort-order <order>` | Sort order: `asc` \| `desc` (default: `desc`) |
-| `--page <number>` | Page number (default: `1`) |
-| `--page-size <number>` | Items per page (default: `10`) |
-| `--output <file>` | Save the CSV response to a file (e.g. `out.csv`). Without this flag the raw CSV is printed to stdout. |
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--activity-type <types>` | Comma-separated DeFi activity types | — |
+| `--from <address>` | Filter activities from an address | — |
+| `--platform <addresses>` | Comma-separated platform addresses (max 5) | — |
+| `--source <addresses>` | Comma-separated source addresses (max 5) | — |
+| `--token <address>` | Filter activities by token address | — |
+| `--from-time <timestamp>` | Start time (unix seconds) | — |
+| `--to-time <timestamp>` | End time (unix seconds) | — |
+| `--sort-by <field>` | Sort field | `block_time` |
+| `--sort-order <order>` | Sort order: `asc` \| `desc` | `desc` |
+| `--output <file>` | Save the CSV response to a file (e.g. `out.csv`). Without this flag the raw CSV is printed to stdout. | — |
 
 **Option details for `historical`:**
 
