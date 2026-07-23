@@ -61,6 +61,51 @@ export function registerAccountCommand(program) {
     });
 
   account
+    .command('transactions-enhanced')
+    .description('Get raw transaction objects for an account with full server-side filtering (time, slot, signature, signer, token, program, instruction)')
+    .requiredOption('--address <address>', 'A wallet address on solana blockchain')
+    .option('--cursor <cursor>', 'Cursor for pagination, obtained from the previous page response')
+    .option('--from-time <timestamp>', 'Filter transactions that happen after this time (unix seconds)')
+    .option('--to-time <timestamp>', 'Filter transactions that happen before this time (unix seconds)')
+    .option('--from-signature <signature>', 'Filter transactions that happen after this signature')
+    .option('--to-signature <signature>', 'Filter transactions that happen before this signature')
+    .option('--limit <number>', 'Number of transactions to return', '10')
+    .option('--from-slot <number>', 'Filter transactions that happen after this slot')
+    .option('--to-slot <number>', 'Filter transactions that happen before this slot')
+    .option('--status <boolean>', 'Filter by transaction status: true (successful) | false (failed)')
+    .option('--program <addresses>', 'Comma-separated program addresses to filter by interacted programs')
+    .option('--instruction <values>', 'Comma-separated program_address+instruction_discriminator hex values (e.g. pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA66063d1201daebea)')
+    .option('--token <tokens>', 'Comma-separated token addresses to filter by interacted token')
+    .option('--signer <addresses>', 'Comma-separated signer addresses to filter by')
+    .option('--token-account', 'Show transactions that interacted with associated token accounts')
+    .option('--encoding <format>', 'Format for transaction data: json | jsonParsed | base64 | base58', 'jsonParsed')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      const params = {
+        address: opts.address,
+        cursor: opts.cursor,
+        limit: opts.limit ? parseInt(opts.limit) : undefined,
+        encoding: opts.encoding,
+      };
+
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
+      if (opts.fromSignature) params.from_signature = opts.fromSignature;
+      if (opts.toSignature) params.to_signature = opts.toSignature;
+      if (opts.fromSlot) params.from_slot = parseInt(opts.fromSlot);
+      if (opts.toSlot) params.to_slot = parseInt(opts.toSlot);
+      if (opts.status !== undefined) params.status = opts.status === 'true';
+      if (opts.program) params.program = opts.program.split(',');
+      if (opts.instruction) params.instruction = opts.instruction.split(',');
+      if (opts.token) params.token = opts.token.split(',');
+      if (opts.signer) params.signer = opts.signer.split(',');
+      if (opts.tokenAccount) params.token_account = true;
+
+      const data = await makeRequest('/account/transactions/enhanced', params, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
+
+  account
     .command('transfers')
     .description('Get transfer data of an account')
     .requiredOption('--address <address>', 'Solana wallet address')

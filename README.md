@@ -2,7 +2,7 @@
 
 Command-line tool for querying Solana blockchain data via the [Solscan Pro API v2.0](https://pro-api.solscan.io/pro-api-docs/v2.0).
 
-Supports 58+ actions across accounts, tokens, transactions, NFTs, blocks, markets, programs, and API monitoring — with JSON and human-readable output modes.
+Supports 59+ actions across accounts, tokens, transactions, NFTs, blocks, markets, programs, and API monitoring — with JSON and human-readable output modes.
 
 ---
 
@@ -175,6 +175,7 @@ solscan account <action> [options]
 | `data-decoded` | Get account data with decoded information | `--address` | — |
 | `tokens` | Get associated token and NFT accounts of an address | `--address`, `--type` | `--page`, `--page-size`, `--hide-zero` |
 | `transactions` | Get recent transactions for an address (cursor-based pagination) | `--address` | `--before`, `--limit` |
+| `transactions-enhanced` | Get raw transaction objects (like getTransaction RPC) with full server-side filtering by time, slot, signature, signer, token, program, instruction | `--address` | `--cursor`, `--from-time`, `--to-time`, `--from-signature`, `--to-signature`, `--limit`, `--from-slot`, `--to-slot`, `--status`, `--program`, `--instruction`, `--token`, `--signer`, `--token-account`, `--encoding` |
 | `transfers` | Get SPL and SOL transfer history of an account | `--address` | `--activity-type`, `--token-account`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--token`, `--amount`, `--value`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow`, `--sort-order`, `--page`, `--page-size` |
 | `stake` | Get active stake accounts of an address | `--address` | `--page`, `--page-size`, `--sort-by`, `--sort-order` |
 | `stake-rewards` | Get stake rewards for an account | `--address` | `--from-time`, `--to-time`, `--page`, `--page-size` |
@@ -206,6 +207,26 @@ solscan account <action> [options]
 | `--before <signature>` | Signature of last tx from previous page | — | Transaction signature |
 | `--limit <number>` | Number of transactions to return | `10` | `10`, `20`, `30`, `40` |
 
+**Option details for `transactions-enhanced`:**
+
+| Option | Description | Default | Valid Values |
+|--------|-------------|---------|--------------|
+| `--cursor <cursor>` | Cursor for pagination, from previous page response | — | — |
+| `--from-time <timestamp>` | Filter transactions after this time (unix seconds) | — | — |
+| `--to-time <timestamp>` | Filter transactions before this time (unix seconds) | — | — |
+| `--from-signature <signature>` | Filter transactions after this signature | — | — |
+| `--to-signature <signature>` | Filter transactions before this signature | — | — |
+| `--limit <number>` | Number of transactions to return | `10` | — |
+| `--from-slot <number>` | Filter transactions after this slot | — | — |
+| `--to-slot <number>` | Filter transactions before this slot | — | — |
+| `--status <boolean>` | Filter by status: `true` (successful) \| `false` (failed) | — | `true`, `false` |
+| `--program <addresses>` | Comma-separated program addresses to filter by | — | — |
+| `--instruction <values>` | Comma-separated `program_address+instruction_discriminator` hex values | — | — |
+| `--token <tokens>` | Comma-separated token addresses to filter by | — | — |
+| `--signer <addresses>` | Comma-separated signer addresses to filter by | — | — |
+| `--token-account` | Show transactions that interacted with associated token accounts | off | — |
+| `--encoding <format>` | Format for transaction data | `jsonParsed` | `json`, `jsonParsed`, `base64`, `base58` |
+
 **Option details for `transfers`:**
 
 | Option | Description | Default |
@@ -236,7 +257,8 @@ ACTIVITY_SPL_CLOSE_ACCOUNT             ACTIVITY_SPL_TOKEN_WITHDRAW_STAKE
 ACTIVITY_SPL_TOKEN_SPLIT_STAKE         ACTIVITY_SPL_TOKEN_MERGE_STAKE
 ACTIVITY_SPL_VOTE_WITHDRAW             ACTIVITY_SPL_SET_OWNER_AUTHORITY
 ACTIVITY_SPL_WITHDRAW_FROM_NONCE       ACTIVITY_SPL_WITHDRAW_EXCESS_LAMPORTS
-ACTIVITY_SPL_UNWRAP_LAMPORTS
+ACTIVITY_SPL_UNWRAP_LAMPORTS           ACTIVITY_SPL_STAKE_MOVE_LAMPORTS
+ACTIVITY_SPL_STAKE_MOVE_STAKE
 ```
 
 **Option details for `stake`:**
@@ -345,6 +367,7 @@ ACTIVITY_SPL_CLOSE_ACCOUNT             ACTIVITY_SPL_TOKEN_WITHDRAW_STAKE
 ACTIVITY_SPL_TOKEN_SPLIT_STAKE         ACTIVITY_SPL_TOKEN_MERGE_STAKE
 ACTIVITY_SPL_VOTE_WITHDRAW             ACTIVITY_SPL_SET_OWNER_AUTHORITY
 ACTIVITY_SPL_WITHDRAW_EXCESS_LAMPORTS  ACTIVITY_SPL_UNWRAP_LAMPORTS
+ACTIVITY_SPL_STAKE_MOVE_LAMPORTS       ACTIVITY_SPL_STAKE_MOVE_STAKE
 ```
 
 **Option details for `leaderboard`:**
@@ -370,6 +393,16 @@ solscan account tokens --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM --
 
 # Portfolio with low-score tokens excluded
 solscan account portfolio --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM --exclude-low-score-tokens
+
+# Raw transaction objects filtered by a specific program, successful only
+solscan account transactions-enhanced --address JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 \
+  --program 675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8 --status true --limit 20
+
+# Raw transaction objects filtered by a specific instruction discriminator
+# (value = program address + first 2 or 8 bytes of instruction data in hex,
+# depending on program IDL standard: 2 bytes for Shank, 8 bytes for Anchor)
+solscan account transactions-enhanced --address pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA \
+  --instruction pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA66063d1201daebea
 
 # Incoming transfers of USDC
 solscan account transfers --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
@@ -866,14 +899,14 @@ solscan market <action> [options]
 
 | Option | Description |
 |--------|-------------|
-| `--address <address>` | Market ID (required) |
+| `--address <address>` | Market address/Pool address (required) |
 | `--time <start>,<end>` | Time range in YYYYMMDD format (e.g. `20240701,20240715`) |
 
 **Option details for `positions`:**
 
 | Option | Description | Default | Valid Values |
 |--------|-------------|---------|--------------|
-| `--address <address>` | Market ID (required) | required | — |
+| `--address <address>` | Market address/Pool address (required) | required | — |
 | `--page <number>` | Page number | `1` | — |
 | `--page-size <number>` | Items per page | `10` | `10`, `20`, `30`, `40` |
 | `--sort-by <field>` | Sort field | `position_value` | `position_value`, `created_time` |
@@ -889,7 +922,7 @@ solscan market list --sort-by volumes_24h --sort-order desc
 # Find markets for a specific token
 solscan market list --token-address EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 
-# Get market info by market ID
+# Get market info by market address
 solscan market info --address 8BnEgHoWFysVcuFFX7QztDmzuH8r5ZFvyP3sYwn1XTh
 
 # Get historical volume for a market
@@ -1142,7 +1175,7 @@ solscan-cli/
 │   ├── api.js                  # Axios HTTP client & error handling
 │   ├── formatter.js            # JSON / human-readable output formatter
 │   └── commands/
-│       ├── account.js          # 17 account actions
+│       ├── account.js          # 18 account actions
 │       ├── token.js            # 16 token actions
 │       ├── transaction.js      # 6 transaction actions
 │       ├── nft.js              # 4 NFT actions
