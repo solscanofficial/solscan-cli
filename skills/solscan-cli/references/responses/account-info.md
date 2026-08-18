@@ -11,6 +11,7 @@ These actions describe **what an address is and what it directly holds right now
 - [`tokens`](#tokens)
 - [`metadata`](#metadata)
 - [`metadata-multi`](#metadata-multi)
+- [`funded-by`](#funded-by)
 
 > Only actions with a confirmed field-level source are documented here. If the action you need isn't listed yet, fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
 
@@ -247,3 +248,42 @@ Batch form of [`metadata`](#metadata): `data` is an **array**, one entry per add
 - Same "mostly empty for ordinary wallets" caveat as `metadata` applies per-item here — most rows will only have `account_address` populated, plus whatever `active_age` the wallet's funding history gives it.
 - Hard cap of 50 addresses per call (same limit as `account funded-by`) — split larger address lists into batches of ≤50 rather than expecting the API to reject or silently truncate a longer list.
 - `--addresses` is comma-separated on the CLI side; the underlying API param is a repeated/array `address` query param (max 50 values), not a single comma-joined string — the CLI handles that translation for you.
+
+## `funded-by`
+
+`solscan account funded-by --addresses <addr1,addr2,...>` (max 50)
+
+`data` is an **array** — one entry per address that Solscan could resolve a funder for. Unlike `metadata-multi`, a queried address is not guaranteed to produce a row: if Solscan has no funding-transaction record for that address, it's simply omitted from `data` rather than returned as a null/empty placeholder — don't assume `data.length == addresses.length`.
+
+Each item in `data`:
+
+| Field | Type | Description |
+|-------|------|--------------|
+| `address` | string | The queried address that was funded — matches one of the addresses passed to `--addresses`. |
+| `funded_by` | string | Address that sent the first funding transaction to `address`. |
+| `tx_hash` | string | Signature of the funding transaction. |
+| `block_time` | number | Unix timestamp (seconds) the funding transaction landed. |
+
+**Example**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "address": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
+      "funded_by": "ZULqpmXtGPdhqkPx2bT9B9eWr5ML67nqUEhCKyaJTo4",
+      "tx_hash": "4pZV3cZazCNYU7oJCWduQ7PeZEf5SVbePSKrNQqR8wzZnxZbgXpfRfYvPg6fg7J7KZbj5QK5iaVmZzuDBKnNwnQT",
+      "block_time": 1634848401
+    }
+  ]
+}
+```
+
+**Interpretation tips**
+
+- This is the non-deprecated, batch replacement for the `funded_by` sub-object nested inside [`metadata`](#metadata)/[`metadata-multi`](#metadata-multi) — prefer this action over that field for any new lookup, especially when checking funders for more than one address at a time.
+- Match rows back to input addresses via each item's `address` field — as with `metadata-multi`, `data`'s order is not documented as matching `--addresses`' input order.
+- A missing row for one of your input addresses most commonly means that address's earliest inbound transaction predates Solscan's funding-history index, or the address has never received an inbound transfer (e.g. it was only ever an outgoing/created-on-chain account) — treat it as "unknown," not as a call failure.
+- Hard cap of 50 addresses per call (same limit as `account metadata-multi`) — split larger lists into batches of ≤50.
+- On a validation failure (e.g. a malformed address in the list), the API returns `400` with `errors.code` and a message naming the offending address — see [account.md](account.md#common-envelope) for the shared error envelope.

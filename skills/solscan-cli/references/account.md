@@ -66,7 +66,7 @@ ACTIVITY_BRIDGE_ORDER_IN ACTIVITY_BRIDGE_ORDER_OUT
 
 **`metadata` response fields**: `account_address`, `account_label`, `account_icon`, `account_tags` (e.g. `dex_wallet`), `account_type`, `account_domain`, `funded_by` (deprecated: `funded_by` address + `tx_hash` + `block_time`), `active_age` (days since first funded).
 
-**`funded-by` response fields**: `address`, `funded_by`, `tx_hash`, `block_time`.
+**`funded-by` response fields**: `address`, `funded_by`, `tx_hash`, `block_time`. `data` only includes rows Solscan could resolve — a queried address with no known funder is silently omitted, not returned as null. Full field-by-field detail: [responses/account-info.md](responses/account-info.md#funded-by).
 
 ## Response Fields
 

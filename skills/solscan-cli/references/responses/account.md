@@ -6,11 +6,11 @@ This index only holds the envelope shared by every action. Field-level docs live
 
 | File | Covers | Actions |
 |------|--------|---------|
-| [account-info.md](account-info.md) | What an address *is* and what it directly holds right now (no history, no pricing) | `detail`, `data-decoded`, `tokens`, `metadata`, `metadata-multi` |
+| [account-info.md](account-info.md) | What an address *is* and what it directly holds right now (no history, no pricing) | `detail`, `data-decoded`, `tokens`, `metadata`, `metadata-multi`, `funded-by` |
 | [account-activity.md](account-activity.md) | Time-ordered activity for an address | `transactions`, `transactions-enhanced`, `transfers`, `transfer-total`, `transfer-export`, `defi`, `balance-change` |
 | [account-holdings.md](account-holdings.md) | Aggregate, USD-priced holdings and staking | `portfolio`, `stake`, `stake-rewards`, `reward-export` |
 
-> Only actions with a confirmed field-level source are documented in those files. If the action you need isn't listed yet (e.g. `leaderboard`, `funded-by`), fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
+> Only actions with a confirmed field-level source are documented in those files. If the action you need isn't listed yet (e.g. `leaderboard`), fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
 
 ## Common envelope
 
