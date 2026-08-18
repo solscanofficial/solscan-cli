@@ -9,6 +9,7 @@ These actions describe **what an address is and what it directly holds right now
 - [`detail`](#detail)
 - [`data-decoded`](#data-decoded)
 - [`tokens`](#tokens)
+- [`metadata`](#metadata)
 
 > Only actions with a confirmed field-level source are documented here. If the action you need isn't listed yet, fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
 
@@ -157,3 +158,56 @@ Each item in `data`:
 - `--hide-zero` filters out token accounts with `amount: 0` — useful since a wallet can accumulate many empty/closed-out ATAs over time that are otherwise noise in this list.
 - `token_account` (the ATA) and `token_address` (the mint) are easy to confuse — `token_account` is unique per owner+mint pair, while `token_address` is the same across every holder of that token/NFT.
 - `--page-size` only accepts `10`/`20`/`30`/`40` — other values will be rejected by the API, not silently clamped.
+
+## `metadata`
+
+`solscan account metadata --address <ADDRESS>`
+
+`data` is a single object — Solscan's curated identity info for the address (label, icon, tags, domain), not on-chain account state. Unlike `detail`, this is best-effort enrichment: most addresses (an ordinary wallet with no known label) get back an object where every field beyond `account_address` is empty/absent, not an error.
+
+| Field | Type | Description |
+|-------|------|--------------|
+| `account_address` | string | The queried address, echoed back. |
+| `account_label` | string | Solscan's curated display name for the address, e.g. `"Raydium Authority V4"`. Empty/absent for unlabeled addresses (most wallets). |
+| `account_icon` | string | URL to a logo/icon image for the label. Empty/absent alongside `account_label`. |
+| `account_tags` | array of string | Category tags, e.g. `["dex_wallet"]`. The API's own schema mislabels this as `type: string`; the actual field, per the example response, is an array — treat a bare string here as unexpected rather than the documented shape. |
+| `account_type` | string | Broad account classification, e.g. `"address"`. |
+| `account_domain` | string | The address's favorite/primary domain name (e.g. a `.sol` domain), if one is set. Absent for addresses with no registered domain — don't treat a missing field as an error. |
+| `funded_by` | object | **Deprecated.** Who funded this account's first-ever transaction. See sub-fields below. Prefer `account funded-by` (batch, up to 50 addresses) for new code — this field is kept for backward compatibility and may be removed. |
+| `active_age` | number | Days since the address was first funded (i.e. wallet age in days). |
+
+`funded_by` sub-fields (deprecated container):
+
+| Field | Type | Description |
+|-------|------|--------------|
+| `funded_by` | string | Address that sent the funding transaction. |
+| `tx_hash` | string | Signature of the funding transaction. |
+| `block_time` | number | Unix timestamp (seconds) the funding transaction landed. |
+
+**Example**
+
+```json
+{
+  "success": true,
+  "data": {
+    "account_address": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
+    "account_label": "Raydium Authority V4",
+    "account_icon": "https://statics.solscan.io/ex-img/RVKd61ztZW9GUwhRbbLoYVRE5Xf1B2tVscKqwZqXgEr.png",
+    "account_tags": ["dex_wallet"],
+    "account_type": "address",
+    "funded_by": {
+      "funded_by": "ZULqpmXtGPdhqkPx2bT9B9eWr5ML67nqUEhCKyaJTo4",
+      "tx_hash": "4pZV3cZazCNYU7oJCWduQ7PeZEf5SVbePSKrNQqR8wzZnxZbgXpfRfYvPg6fg7J7KZbj5QK5iaVmZzuDBKnNwnQT",
+      "block_time": 1634848401
+    },
+    "active_age": 1402
+  }
+}
+```
+
+**Interpretation tips**
+
+- Most wallets are "boring" here: expect `account_label`/`account_icon`/`account_tags`/`account_domain` to be empty or absent for addresses that aren't a known exchange/protocol/DEX account. Don't treat a mostly-empty response as an error — check `account_address` came back to confirm the call succeeded.
+- `funded_by` is explicitly deprecated in the API schema — for new lookups, or when funder info is needed for multiple addresses at once, use `account funded-by --addresses <...>` (max 50) instead of relying on this nested field.
+- `active_age` counts from the account's **first funding transaction**, not from when it was first labeled/tagged — a freshly-labeled well-known address can still show a large `active_age` if the underlying wallet is old.
+- For batch identity lookups (many addresses at once), use `account metadata-multi` instead of calling `metadata` in a loop — same field shape, one object per address in `data`.
