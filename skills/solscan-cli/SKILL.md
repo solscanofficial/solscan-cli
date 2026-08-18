@@ -58,6 +58,20 @@ Each resource's full option tables, valid enum values, and worked examples live 
 - `transaction detail --signature <SIG>` for the raw balance-change/IDL view, or `transaction actions --signature <SIG>` for a human-readable decoded summary (swaps, transfers, NFT activity). Use `actions` first when the user just wants "what happened" — it's already interpreted.
 - Batch up to 50 at once with `detail-multi`/`actions-multi --signatures sig1,sig2,...` instead of looping individual calls.
 
+### Filtering an account's transaction history
+Reach for `account transactions-enhanced` instead of plain `account transactions` whenever the user wants to narrow results by program, instruction, signer, token, status, or a time/slot range — `transactions` only offers cursor pagination (`--before`/`--limit`), no server-side filters.
+1. Only successful transactions that touched a specific program:
+   `account transactions-enhanced --address <ADDR> --program <PROGRAM_ID> --status true --limit 20`
+2. One specific instruction on a program — `--instruction` is the program address plus the instruction's discriminator hex (first 2 bytes for Shank IDL, 8 for Anchor IDL) concatenated, e.g. `pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA66063d1201daebea`:
+   `account transactions-enhanced --address <ADDR> --instruction pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA66063d1201daebea`
+3. Bounded by time window and a specific token — useful for "did this wallet interact with token X last week":
+   `account transactions-enhanced --address <ADDR> --token <MINT> --from-time <UNIX> --to-time <UNIX>`
+4. Filtered by another signer in a multisig-style transaction, or by the token account (rather than owner wallet) actually touched:
+   `account transactions-enhanced --address <ADDR> --signer <OTHER_SIGNER> --token-account <ATA>`
+5. To keep paging further back: take the last row's `transaction.signatures[0]` and pass it as `--to-signature` on the next call (or track `--to-slot`/`--to-time`), or reuse a returned `--cursor` if one came back.
+
+Use `--encoding jsonParsed` (the default) to get named instruction fields for recognized programs; switch to `json`/`base64`/`base58` only if you need the raw, unparsed instruction data.
+
 ### Market / ecosystem overview
 `token trending`, `token latest --platform-id <launchpad>`, `market list --sort-by volumes_24h`, `program list --sort-by num_txs` — combine as needed for "what's happening on Solana right now" type questions.
 
