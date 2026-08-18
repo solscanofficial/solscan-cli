@@ -361,13 +361,13 @@ export function registerAccountCommand(program) {
 
   account
     .command('transfer-export')
-    .description('Export transfer data of an account. Max 5000 items. Max 1 request per minute.')
+    .description('Export transfer data of an account. Max 5000 items. Rate limit: 10 requests per minute.')
     .requiredOption('--address <address>', 'Solana wallet address')
     .option('--activity-type <types>', 'Comma-separated activity types')
     .option('--token-account <account>', 'Filter transfers for a specific token account in the wallet')
-    .option('--from <address>', 'Filter transfers from an address')
-    .option('--to <address>', 'Filter transfers to an address')
-    .option('--token <address>', 'Filter by token address. Use So11111111111111111111111111111111111111111 for native SOL')
+    .option('--from <addresses>', 'Source addresses, comma-separated (max 5)')
+    .option('--to <addresses>', 'Destination addresses, comma-separated (max 5)')
+    .option('--token <tokens>', 'Token addresses, comma-separated (max 5). Use So11111111111111111111111111111111111111111 for native SOL')
     .option('--amount <min>,<max>', 'Filter by amount range (e.g. 1,100)')
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')

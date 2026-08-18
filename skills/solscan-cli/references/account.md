@@ -16,7 +16,7 @@ solscan account <action> [options]
 | `transactions-enhanced` | Raw `getTransaction`-shaped objects with full server-side filtering | `--address` | `--cursor`, `--from-time`, `--to-time`, `--from-signature`, `--to-signature`, `--from-slot`, `--to-slot`, `--limit`, `--status`, `--program`, `--instruction`, `--token`, `--signer`, `--token-account`, `--encoding` |
 | `transfers` | SPL + SOL transfer history | `--address` | `--activity-type`, `--token-account`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--token`, `--amount`, `--value`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--flow`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 | `transfer-total` | Total transfer count (hard-capped 10M records) | `--address` | same filters as `transfers` minus pagination |
-| `transfer-export` | Transfer history CSV (max 5000 rows, 10 req/min) | `--address` | same filters as `transfers` + `--output` |
+| `transfer-export` | Transfer history CSV (max 5000 rows, 10 req/min; no default time window) | `--address` | same core filters as `transfers` (`--from`/`--to`/`--token` comma-separated) minus `--exclude-from`/`--exclude-to`/`--value`/sort/pagination, + `--output` |
 | `defi` | DeFi protocol interactions | `--address` | `--activity-type`, `--from`, `--source`, `--token`, `--value`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 | `defi-export` | DeFi activity CSV (max 5000 rows, 10 req/min) | `--address` | same as `defi` + `--platform`, `--output` |
 | `balance-change` | Historical balance changes | `--address` | `--token-account`, `--token`, `--from-time`, `--to-time`, `--remove-spam`, `--amount`, `--flow`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
@@ -34,7 +34,7 @@ solscan account <action> [options]
 
 **`transactions-enhanced`**: `--encoding` `json`\|`jsonParsed` (default)\|`base64`\|`base58` · `--status true|false` filters success/failure · `--instruction` value = program address + first 2 bytes (Shank IDL) or 8 bytes (Anchor IDL) of the instruction discriminator, hex, concatenated, e.g. `pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA66063d1201daebea`.
 
-**`transfers` / `transfer-total` / `transfer-export`**: `--from`/`--exclude-from`/`--to`/`--exclude-to`/`--token` are comma-separated, max 5 · `--amount`/`--value` are single flags in `min,max` comma-separated form (e.g. `--value 100,999999`) · `--flow` `in`\|`out` · `transfers` `--sort-by` currently only supports `block_time` (default) · `transfers` `--page-size` `10/20/30/40/60/100` (default `10`) · `transfer-total` defaults to last 3 weeks if no time filter given.
+**`transfers` / `transfer-total` / `transfer-export`**: `--from`/`--to`/`--token` are comma-separated, max 5 (`transfers`/`transfer-total` additionally support `--exclude-from`/`--exclude-to`) · `--amount`/`--value` are single flags in `min,max` comma-separated form (e.g. `--value 100,999999`) — `transfer-export` has `--amount` but not `--value` · `--flow` `in`\|`out` · `transfers` `--sort-by` currently only supports `block_time` (default) · `transfers` `--page-size` `10/20/30/40/60/100` (default `10`) · `transfer-total` defaults to last 3 weeks if no time filter given · `transfer-export` has no `--sort-by`/`--sort-order`/`--page`/`--page-size` and no default time window (an unfiltered call attempts to export the entire history, capped at 5000 rows); its response is a raw CSV string, not JSON — use `--output <file>` to save it, otherwise it prints to stdout.
 
 Transfer `--activity-type` values (comma-separated):
 ```

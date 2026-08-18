@@ -10,6 +10,7 @@ These actions all return **time-ordered activity** for an address — transactio
 - [`transactions-enhanced`](#transactions-enhanced)
 - [`transfers`](#transfers)
 - [`transfer-total`](#transfer-total)
+- [`transfer-export`](#transfer-export)
 - [`defi`](#defi)
 - [`balance-change`](#balance-change)
 
@@ -217,6 +218,41 @@ This is the odd one out in the `account` group: unlike every other action, `data
 - **Defaults to the last ~3 weeks** if neither `--from-time` nor `--to-time` is given — this is a narrower window than it looks, so a "total transfers" question with no time filter answers "in the last 3 weeks," not "ever." Pass explicit `--from-time`/`--to-time` (or a wide range) when the user wants a lifetime or custom-period total.
 - **Hard-capped at 10,000,000** — if a whale/exchange/program address is anywhere near that count, the returned number may be truncated rather than exact. Tighten `--from-time`/`--to-time` or other filters and re-check if the count looks suspiciously round or you suspect truncation.
 - Cheap way to decide whether `transfers` (paginated detail) or `transfer-export` (CSV, capped at 5000 rows) is the right next call: if `transfer-total` is small, `transfers`/`transfer-export` can realistically return everything; if it's huge, narrow the filters first rather than paging or exporting blindly.
+
+## `transfer-export`
+
+`solscan account transfer-export --address <ADDRESS> [filters...] [--output <file>]`
+
+Same filter set as [`transfers`](#transfers) (`--activity-type`, `--token-account`, `--from`, `--to`, `--token`, `--amount`, `--from-time`/`--to-time`, `--exclude-amount-zero`, `--flow`), minus `--exclude-from`/`--exclude-to`/`--value`/sort/pagination — like `transfers`, `--from`/`--to`/`--token` here are comma-separated (max 5). This is the CSV/export twin of `transfers`, not a per-wallet rollup across multiple filters. The response is not JSON: it's a **raw CSV string** (`success`/`data` envelope does not apply). Without `--output`, the CLI prints the CSV text as-is to stdout; with `--output <file>`, it's written verbatim to disk via `saveToCsv()`. Capped at 5000 rows per request and rate-limited to 10 requests/minute — unlike `reward-export`, there's no default time window, so an unfiltered call attempts to export the address's entire transfer history (subject to the 5000-row cap).
+
+CSV columns (header row is included in the output):
+
+| Column | Type | Description |
+|--------|------|--------------|
+| `Signature` | string | Transaction signature — feed into `transaction detail`/`transaction actions` for the full transaction. Same value as `trans_id` on [`transfers`](#transfers). |
+| `Block Time` | number | Unix timestamp (seconds) of the slot. |
+| `Human Time` | string | Same instant as `Block Time`, as an ISO 8601 date-time (e.g. `2026-05-18T18:22:52.000Z`). |
+| `Action` | string | Short form of `activity_type` with the `ACTIVITY_SPL_` prefix stripped (e.g. `TRANSFER` for `ACTIVITY_SPL_TRANSFER`, `BURN` for `ACTIVITY_SPL_BURN`). |
+| `From` | string | Source wallet/owner address. Same as `from_address` on `transfers`. |
+| `To` | string | Destination wallet/owner address. Same as `to_address` on `transfers`. |
+| `Amount` | number | Raw transfer amount in the token's base units (not yet decimal-adjusted) — divide by `10 ** Decimals` for the human-readable amount, same as `amount` on `transfers`. |
+| `Flow` | string | `in` or `out`, **relative to the `--address` you queried** — same meaning as `flow` on `transfers`. |
+| `Value` | number | USD value of the transfer at the time it happened: decimal-adjusted `Amount` × the token's price at that time. **Not** the same number as `Amount` — don't treat `Value` as an already-adjusted token amount. |
+| `Decimals` | number | Decimals for `Token Address` — same as `token_decimals` on `transfers`. |
+| `Token Address` | string | Mint address of the transferred token (native SOL shows as the `So11111111111111111111111111111111111111111`). |
+
+**Example**
+
+```
+Signature,Block Time,Human Time,Action,From,To,Amount,Flow,Value,Decimals,Token Address
+5vwF267YiYngfWBscpx975UM7xsNzEDhqycEsUKmfHtc8CGH5XXqLoYVrGhTyJ4VPCPaQT1XjWghmrH2NAjQ3eTh,1779128572,2026-05-18T18:22:52.000Z,TRANSFER,5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9,9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM,24047160221000,in,24048378.23,6,USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB
+```
+
+**Interpretation tips**
+
+- Always divide `Amount` by `10 ** Decimals` before displaying — the example row is `24047160.221` tokens (`24047160221000 / 10^6`), not ~24 trillion. `Value` is already USD-denominated and needs no further adjustment.
+- `Value` and the decimal-adjusted `Amount` are usually close but not identical (price moves between rows, or the token isn't a 1:1 stablecoin) — don't assume `Value == Amount / 10 ** Decimals`.
+- No default time window: An unfiltered `transfer-export` call exports as much history as exists, up to the 5000-row cap. For a high-volume address, pass `--from-time`/`--to-time` (or check `transfer-total` first) to avoid silently truncating at row 5000.
 
 ## `defi`
 
