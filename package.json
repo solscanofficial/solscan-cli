@@ -7,6 +7,12 @@
   "bin": {
     "solscan": "./bin/solscan.js"
   },
+  "files": [
+    "bin",
+    "src",
+    "skills",
+    "README.md"
+  ],
   "scripts": {
     "start": "node bin/solscan.js",
     "test": "vitest run"

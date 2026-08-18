@@ -122,6 +122,7 @@ export function registerAccountCommand(program) {
     .option('--to-time <timestamp>', 'End time (unix seconds)')
     .option('--exclude-amount-zero', 'Exclude transfers with zero amount')
     .option('--flow <direction>', 'Filter by transfer direction: in | out')
+    .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
     .option('--page <number>', 'Page number', '1')
     .option('--page-size <number>', 'Items per page (10, 20, 30, 40, 60, 100)', '10')
@@ -131,6 +132,7 @@ export function registerAccountCommand(program) {
         address: opts.address,
         page: parseInt(opts.page),
         page_size: parseInt(opts.pageSize),
+        sort_by: opts.sortBy,
       };
 
       if (opts.activityType) params.activity_type = opts.activityType.split(',');
@@ -183,7 +185,7 @@ export function registerAccountCommand(program) {
   account
     .command('stake-rewards')
     .description('Get stake rewards for an account')
-    .requiredOption('--address <address>', 'A stake account on Solana')
+    .requiredOption('--address <address>', 'A stake account on Solana (not the owner wallet — an owner address returns an empty result)')
     .option('--from-time <timestamp>', 'Start time (unix seconds). Default: 1 month before to_time')
     .option('--to-time <timestamp>', 'End time (unix seconds). Defaults to the current time')
     .option('--page <number>', 'Page number', '1')
@@ -339,8 +341,8 @@ export function registerAccountCommand(program) {
 
   account
     .command('reward-export')
-    .description('Export stake rewards for an account. Max 5000 items. Default: last 1 month. Max 1 request per minute. Data available from epoch 132')
-    .requiredOption('--address <address>', 'A wallet address on solana blockchain')
+    .description('Export stake rewards for an account. Max 5000 items. Default: last 1 month. Rate limit: 10 requests per minute. Data available from epoch 132')
+    .requiredOption('--address <address>', 'A stake account on Solana (not the owner wallet — an owner address returns an empty result)')
     .option('--from-time <timestamp>', 'Start time (unix seconds). Default: 1 month before to_time')
     .option('--to-time <timestamp>', 'End time (unix seconds). Default: current time')
     .option('--output <file>', 'Save result to a csv file (e.g. out.csv)')

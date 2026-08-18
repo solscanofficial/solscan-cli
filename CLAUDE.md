@@ -74,6 +74,10 @@ Key patterns:
 - Parameters use camelCase; API parameters convert to snake_case (e.g., `opts.pageSize` → `page_size`)
 - Always pass `root.apiKey` and `root.json` to API calls and output
 
+## Agent Skill
+
+`skills/solscan-cli/SKILL.md` teaches Claude Code (and other skill-aware agents) how to drive this CLI directly — command shape, pagination/time-filter conventions, and an action index pointing into per-resource reference files (`skills/solscan-cli/references/*.md`). It ships inside the published npm package (see `files` in package.json / the `!skills/**/*.md` exception in `.npmignore`), mirroring how the individual `src/commands/*.js` files are organized. When adding or renaming a command, update the matching reference file so the skill doesn't drift from actual CLI behavior.
+
 ## Testing
 
 - Uses Vitest 2.0 (configured but test files not yet created)
