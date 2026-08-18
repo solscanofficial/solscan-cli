@@ -10,8 +10,9 @@ These actions return **aggregate, valued snapshots** of an address — USD-price
 - [`stake`](#stake)
 - [`stake-rewards`](#stake-rewards)
 - [`reward-export`](#reward-export)
+- [`leaderboard`](#leaderboard)
 
-> Only actions with a confirmed field-level source are documented here. If the action you need isn't listed yet (e.g. `leaderboard`), fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
+> Only actions with a confirmed field-level source are documented here. If the action you need isn't listed yet, fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
 
 ## `portfolio`
 
@@ -254,3 +255,59 @@ Epoch, Effective Slot, Effective Time Unix, Effective Time, Reward Amount, Chang
 - If a wallet holds multiple stake accounts and you need each one's export, call `reward-export` once per `stake_account` (from `account stake --address <WALLET>`) — there's no single `--address` value that rolls up multiple stake accounts into one export.
 - On failure (invalid/malformed address, auth, rate limit) the API falls back to the standard JSON error envelope (`success: false`, `errors.code`/`errors.message`) instead of CSV text — code that always expects a CSV string back should check for a leading `{` before parsing. A syntactically valid but wrong-kind address (e.g. an owner wallet instead of a stake account) does not trigger this — it returns an empty CSV instead.
 - The two deprecated aliases `time_from`/`time_to` (documented as deprecated, superseded by `from_time`/`to_time`) are intentionally **not** exposed as CLI flags — use `--from-time`/`--to-time`.
+
+## `leaderboard`
+
+`solscan account leaderboard [--sort-by <sol_values|stake_values|token_values|total_values>] [--sort-order <asc|desc>] [--page <n>] [--page-size <10|20|30|40|60|100>]`
+
+No `--address` — this ranks accounts **across the whole chain** by USD-valued holdings, not a lookup for one address. Unlike the array-shaped list actions elsewhere in this file, `data` here is a **wrapper object** containing the ranked list plus a total count, not a bare array — don't treat `data` itself as iterable.
+
+| Field | Type | Description |
+|-------|------|--------------|
+| `data.data` | array of object | The ranked page of accounts, ordered per `--sort-by`/`--sort-order` (default: `total_values` descending is typical, but `--sort-order` is not required — omit it and the API picks its own default direction). |
+| `data.total` | number | Total number of accounts in the full leaderboard (not just this page) — use with `--page`/`--page-size` to compute total pages. |
+
+Each item in `data.data`:
+
+| Field | Type | Description |
+|-------|------|--------------|
+| `account` | string | The ranked address. |
+| `sol_values` | number | USD value of native SOL holdings. |
+| `token_values` | number | USD value of SPL token holdings. |
+| `stake_values` | number | USD value of staked SOL. |
+| `total_values` | number | Sum of the three above — the ranking figure when `--sort-by total_values` (the default). |
+
+**Example**
+
+```json
+{
+  "success": true,
+  "data": {
+    "data": [
+      {
+        "account": "2RH6rUTPBJ9rUDPpuV9b8z1YL56k1tYU6Uk5ZoaEFFSK",
+        "sol_values": 832.15,
+        "token_values": 11542680679.8,
+        "stake_values": 0,
+        "total_values": 11542681511.95
+      },
+      {
+        "account": "4ZJhPQAgUseCsWhKvJLTmmRRUV74fdoTpQLNfKoekbPY",
+        "sol_values": 11173984.7,
+        "token_values": 0.04,
+        "stake_values": 10905679993.31,
+        "total_values": 10916853978.05
+      }
+    ],
+    "total": 9570
+  }
+}
+```
+
+**Interpretation tips**
+
+- Double-nested `data.data` is unique to this action among `account` commands — every other list action in this skill returns a bare `data: [...]` array. Reach for `data.data` here, not `data`, when extracting rows.
+- `data.total` is the only action in the `account` group that reports a total count for pagination — combine it with `--page-size` to know how many pages exist (`Math.ceil(total / page_size)`), unlike `tokens`/`stake`/`stake-rewards`, which require paging until a short page comes back.
+- `total_values` is not guaranteed to exactly equal `sol_values + token_values + stake_values` in every row due to independent rounding at the source — treat small discrepancies as expected, not a data bug.
+- A single high-`token_values` outlier (like the first example row, ~$11.5B in token value) is typically a large token's own mint/treasury/liquidity-pool authority account showing up as a "wallet" — the leaderboard ranks addresses by raw on-chain value, with no filtering for whether the address is a real end-user wallet vs. a program-controlled account.
+- `--sort-by` accepts `sol_values`/`stake_values`/`token_values`/`total_values` (default `total_values`); there's no `--address` filter on this action — to check where one specific address ranks, cross-reference its `account portfolio`/`account stake` totals manually rather than searching this endpoint.

@@ -62,7 +62,7 @@ ACTIVITY_BRIDGE_ORDER_IN ACTIVITY_BRIDGE_ORDER_OUT
 
 **`stake-rewards`** / **`reward-export`**: `--address` must be a **stake account** (e.g. `stake_account` from `account stake`), not the owner wallet — an owner address doesn't error, it silently returns empty (`data: []` for `stake-rewards`, header-only CSV for `reward-export`). `stake-rewards` `--page-size` `10/20/30/40/60/100`. `reward-export` defaults to past 1 month if no time filter.
 
-**`leaderboard`**: `--sort-by` `sol_values`\|`stake_values`\|`token_values`\|`total_values`(default) · `--page-size` `10/20/30/40/60/100`.
+**`leaderboard`**: `--sort-by` `sol_values`\|`stake_values`\|`token_values`\|`total_values`(default) · `--page-size` `10/20/30/40/60/100`. Unlike other list actions, `data` is `{ data: [...], total }` (double-nested), not a bare array. Full field-by-field detail: [responses/account-holdings.md](responses/account-holdings.md#leaderboard).
 
 **`metadata` response fields**: `account_address`, `account_label`, `account_icon`, `account_tags` (e.g. `dex_wallet`), `account_type`, `account_domain`, `funded_by` (deprecated: `funded_by` address + `tx_hash` + `block_time`), `active_age` (days since first funded).
 
@@ -70,7 +70,7 @@ ACTIVITY_BRIDGE_ORDER_IN ACTIVITY_BRIDGE_ORDER_OUT
 
 ## Response Fields
 
-Field-by-field description of each action's JSON response (types, meaning, edge cases), split by topic: [responses/account.md](responses/account.md) (index + shared envelope), [responses/account-info.md](responses/account-info.md) (`detail`/`data-decoded`/`tokens`/`metadata`/`metadata-multi`), [responses/account-activity.md](responses/account-activity.md) (`transactions*`/`transfers*`/`defi`/`balance-change`), [responses/account-holdings.md](responses/account-holdings.md) (`portfolio`/`stake`/`stake-rewards`/`reward-export`).
+Field-by-field description of each action's JSON response (types, meaning, edge cases), split by topic: [responses/account.md](responses/account.md) (index + shared envelope), [responses/account-info.md](responses/account-info.md) (`detail`/`data-decoded`/`tokens`/`metadata`/`metadata-multi`/`funded-by`), [responses/account-activity.md](responses/account-activity.md) (`transactions*`/`transfers*`/`defi`/`balance-change`), [responses/account-holdings.md](responses/account-holdings.md) (`portfolio`/`stake`/`stake-rewards`/`reward-export`/`leaderboard`).
 
 ## Examples
 
