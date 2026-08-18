@@ -12,6 +12,7 @@ These actions all return **time-ordered activity** for an address — transactio
 - [`transfer-total`](#transfer-total)
 - [`transfer-export`](#transfer-export)
 - [`defi`](#defi)
+- [`defi-export`](#defi-export)
 - [`balance-change`](#balance-change)
 
 > Only actions with a confirmed field-level source are documented here. If the action you need isn't listed yet, fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
@@ -334,6 +335,52 @@ Each item in `data`:
 - Not every `activity_type` populates every `amount_info` field — a single-sided action like `ACTIVITY_SPL_TOKEN_STAKE`, `ACTIVITY_BORROWING`, or `ACTIVITY_TOKEN_DEPOSIT_VAULT` may only have a `token1`/`amount1` leg, with `token2`/`amount2`/`routers` absent rather than an error.
 - `sources` (the pool/venue program(s) touched) and `platform` (the top-level protocol/aggregator attributed for the activity) are different axes — for a direct DEX swap they're often the same address; for an aggregated swap `platform` is the aggregator (e.g. Jupiter) while `sources` lists the underlying pool(s) it routed through.
 - This endpoint has no total/count metadata and no CSV export equivalent documented here beyond `defi-export` (same filters, adds `--platform`, CSV output, rate-limited).
+
+## `defi-export`
+
+`solscan account defi-export --address <ADDRESS> [filters...] [--output <file>]`
+
+Same filter set as [`defi`](#defi) (`--activity-type`, `--from`, `--source`, `--token`, `--value`, `--from-time`/`--to-time`, `--sort-by`/`--sort-order`), plus `--platform` (comma-separated, max 5) — this is the CSV/export twin of `defi`, not a rollup across multiple filters. The response is not JSON: it's a **raw CSV string** (`success`/`data` envelope does not apply). Without `--output`, the CLI prints the CSV text as-is to stdout; with `--output <file>`, it's written verbatim to disk via `saveToCsv()`. Capped at 5000 rows per request and rate-limited to 10 requests/minute — like `defi`, there's no default time window and no `--page`/`--page-size`, so an unfiltered call attempts to export the address's entire DeFi history (subject to the 5000-row cap).
+
+CSV columns (header row is included in the output):
+
+| Column | Type | Description |
+|--------|------|--------------|
+| `Signature` | string | Transaction signature — feed into `transaction detail`/`transaction actions` for the full transaction. Same value as `trans_id` on [`defi`](#defi). |
+| `Block Time` | number | Unix timestamp (seconds) of the slot. Same as `block_time` on `defi`. |
+| `Human Time` | string | Same instant as `Block Time`, as an ISO 8601 date-time (e.g. `2026-05-18T09:36:13.000Z`). Same as `time` on `defi`. |
+| `Action` | string | Short form of `activity_type` with the `ACTIVITY_` prefix stripped and underscores turned into spaces (e.g. `TOKEN SWAP` for `ACTIVITY_TOKEN_SWAP`). Note this differs from `transfer-export`'s `Action` column, which only strips `ACTIVITY_SPL_` and leaves the remaining underscores in place. |
+| `From` | string | The wallet/account address that initiated the activity. Same as `from_address` on `defi`. |
+| `Token1` | string | Mint address of the first token in the activity. Same as `amount_info.token1` on `defi`. |
+| `Amount1` | number | Raw amount of `Token1` in base units — divide by `10 ** TokenDecimals1` for the human-readable amount. Same as `amount_info.amount1` on `defi`. |
+| `TokenDecimals1` | number | Decimals for `Token1`. Same as `amount_info.token1_decimals` on `defi`. |
+| `Token2` | string | Mint address of the second token in the activity. Same as `amount_info.token2` on `defi` — likely blank for single-sided activities (e.g. `ACTIVITY_SPL_TOKEN_STAKE`, `ACTIVITY_BORROWING`) whose JSON equivalent has no second leg, though this hasn't been confirmed against a live single-sided export row. |
+| `Amount2` | number | Raw amount of `Token2` in base units, same caveat as `Amount1`. Same as `amount_info.amount2` on `defi`. |
+| `TokenDecimals2` | number | Decimals for `Token2`. Same as `amount_info.token2_decimals` on `defi`. |
+| `Value` | number | USD value of the activity at the time it happened. |
+| `Platforms` | string | Protocol/aggregator address(es) attributed to the activity — corresponds to `platform` on `defi`. When more than one applies, values are joined with `\|` (pipe). |
+| `Sources` | string | Pool/venue program address(es) the activity routed through — corresponds to `sources` (an array) on `defi`. Same `\|`-joined format as `Platforms` when there's more than one. |
+
+**Example**
+
+```
+Signature,Block Time,Human Time,Action,From,Token1,Amount1,TokenDecimals1,Token2,Amount2,TokenDecimals2,Value,Platforms,Sources
+444aLCyHZs3xFRUjP7Uxaa3XxcMDiBtWBQZ5JyJay7Z936EfuhMJkJyQFqfVPku9tJ8P9HRy86BXx9qFtC2j9krW,1779096973,2026-05-18T09:36:13.000Z,TOKEN SWAP,ErfRfSMGj9sSuNvFAjA7FUj6CRwEjSKGpPvKzP3SNH8e,Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB,0,6,EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v,0,6,1363.37
+```
+
+`Sources` (and `Platforms`) with multiple values, pipe-joined:
+
+```
+proVF4pMXVaYqmy4NjniPh4pqKNfMmsihgd4wdkCX3u||whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc|SCoRcH8c2dpjvcJD6FiPbCSQyQgu3PcUAWj2Xxx3mqn|TessVdML9pBGgG9yGks7o4HewRaXVAMuoVj4x83GLQ
+```
+
+**Interpretation tips**
+
+- Always divide `Amount1`/`Amount2` by `10 ** TokenDecimals1`/`TokenDecimals2` before displaying, same rule as `amount_info.amount1`/`amount2` on `defi`.
+- The published example row has `Amount1`/`Amount2` both `0` despite a nonzero `Value` — the export can report `0` raw amounts for a swap-like activity while `Value` still reflects the USD size of the trade. Don't treat a `0` amount as "nothing happened," and don't try to derive `Value` from `Amount1`/`Amount2` in this export — they aren't guaranteed to reconcile the way they do on other endpoints.
+- No default time window and no `--page`/`--page-size` (unlike `defi`, which paginates) — pass `--from-time`/`--to-time` to bound a high-activity address instead of relying on the 5000-row cap to truncate cleanly.
+- Split `Platforms`/`Sources` on `|` to recover the list — note a run of `||` is possible (as in the example above) and yields an empty-string element, so don't assume every split segment is a valid address; filter out empties before use.
+- `Platforms`/`Sources` are the CSV-flattened counterparts of `defi`'s `platform` (single string) and `sources` (array) fields — prefer `defi` (JSON, paginated) over `defi-export` (CSV, flattened) when you need the structured array shape directly; reserve `defi-export` for bulk export / spreadsheet use.
 
 ## `balance-change`
 

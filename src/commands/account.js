@@ -260,7 +260,7 @@ export function registerAccountCommand(program) {
 
   account
     .command('defi-export')
-    .description('Export defi activities data of an account. Max 5000 items. Max 1 request per minute.')
+    .description('Export defi activities data of an account. Max 5000 items per request. Rate limit: 10 requests per minute.')
     .requiredOption('--address <address>', 'A wallet address on solana blockchain')
     .option('--activity-type <types>', 'Comma-separated DeFi activity types')
     .option('--from <address>', 'Filter activities from an address')
