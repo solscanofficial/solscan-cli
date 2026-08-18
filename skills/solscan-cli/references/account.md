@@ -70,7 +70,7 @@ ACTIVITY_BRIDGE_ORDER_IN ACTIVITY_BRIDGE_ORDER_OUT
 
 ## Response Fields
 
-Field-by-field description of each action's JSON response (types, meaning, edge cases), split by topic: [responses/account.md](responses/account.md) (index + shared envelope), [responses/account-info.md](responses/account-info.md) (`detail`/`data-decoded`/`tokens`/`metadata`), [responses/account-activity.md](responses/account-activity.md) (`transactions*`/`transfers*`/`defi`/`balance-change`), [responses/account-holdings.md](responses/account-holdings.md) (`portfolio`/`stake`/`stake-rewards`/`reward-export`).
+Field-by-field description of each action's JSON response (types, meaning, edge cases), split by topic: [responses/account.md](responses/account.md) (index + shared envelope), [responses/account-info.md](responses/account-info.md) (`detail`/`data-decoded`/`tokens`/`metadata`/`metadata-multi`), [responses/account-activity.md](responses/account-activity.md) (`transactions*`/`transfers*`/`defi`/`balance-change`), [responses/account-holdings.md](responses/account-holdings.md) (`portfolio`/`stake`/`stake-rewards`/`reward-export`).
 
 ## Examples
 

@@ -10,6 +10,7 @@ These actions describe **what an address is and what it directly holds right now
 - [`data-decoded`](#data-decoded)
 - [`tokens`](#tokens)
 - [`metadata`](#metadata)
+- [`metadata-multi`](#metadata-multi)
 
 > Only actions with a confirmed field-level source are documented here. If the action you need isn't listed yet, fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
 
@@ -211,3 +212,38 @@ Each item in `data`:
 - `funded_by` is explicitly deprecated in the API schema — for new lookups, or when funder info is needed for multiple addresses at once, use `account funded-by --addresses <...>` (max 50) instead of relying on this nested field.
 - `active_age` counts from the account's **first funding transaction**, not from when it was first labeled/tagged — a freshly-labeled well-known address can still show a large `active_age` if the underlying wallet is old.
 - For batch identity lookups (many addresses at once), use `account metadata-multi` instead of calling `metadata` in a loop — same field shape, one object per address in `data`.
+
+## `metadata-multi`
+
+`solscan account metadata-multi --addresses <addr1,addr2,...>` (max 50)
+
+Batch form of [`metadata`](#metadata): `data` is an **array**, one entry per address in `--addresses`, using the exact same per-item field shape as `metadata`'s single object (`account_address`, `account_label`, `account_icon`, `account_tags`, `account_type`, `account_domain`, `funded_by` (deprecated), `active_age` — see [`metadata`](#metadata) for the full field table). Order of `data` is not documented as matching input order — match rows back to input addresses via each item's own `account_address`, don't assume positional alignment.
+
+**Example**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "account_address": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
+      "account_label": "Raydium Authority V4",
+      "account_icon": "https://statics.solscan.io/ex-img/RVKd61ztZW9GUwhRbbLoYVRE5Xf1B2tVscKqwZqXgEr.png",
+      "account_tags": ["dex_wallet"],
+      "account_type": "address",
+      "funded_by": {
+        "funded_by": "ZULqpmXtGPdhqkPx2bT9B9eWr5ML67nqUEhCKyaJTo4",
+        "tx_hash": "4pZV3cZazCNYU7oJCWduQ7PeZEf5SVbePSKrNQqR8wzZnxZbgXpfRfYvPg6fg7J7KZbj5QK5iaVmZzuDBKnNwnQT",
+        "block_time": 1634848401
+      },
+      "active_age": 1402
+    }
+  ]
+}
+```
+
+**Interpretation tips**
+
+- Same "mostly empty for ordinary wallets" caveat as `metadata` applies per-item here — most rows will only have `account_address` populated, plus whatever `active_age` the wallet's funding history gives it.
+- Hard cap of 50 addresses per call (same limit as `account funded-by`) — split larger address lists into batches of ≤50 rather than expecting the API to reject or silently truncate a longer list.
+- `--addresses` is comma-separated on the CLI side; the underlying API param is a repeated/array `address` query param (max 50 values), not a single comma-joined string — the CLI handles that translation for you.
