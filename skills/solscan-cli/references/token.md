@@ -46,6 +46,10 @@ Transfer/DeFi `--activity-type` enums are the same lists as in [account.md](acco
 
 **`latest`**: `--platform-id` one of `jupiter`, `lifinity`, `meteora`, `orca`, `raydium`, `phoenix`, `sanctum`, `kamino`, `pumpfun`, `openbook`, `apepro`, `stabble`, `jupiterdca`, `jupiter_limit_order`, `solfi`, `zerofi`, `letsbonkfun_launchpad`, `raydium_launchlab`, `believe_launchpad`, `moonshot_launchpad`, `jup_studio_launchpad`, `bags_launchpad`. `--page-size` `10/20/30/40/60/100`.
 
+## Response Fields
+
+Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (`transfers`).
+
 ## Examples
 
 ```bash
