@@ -6,6 +6,7 @@ This index only holds the envelope shared by every action. Field-level docs live
 
 | File | Covers | Actions |
 |------|--------|---------|
+| [token-info.md](token-info.md) | What a token is — identity, supply, authorities, market snapshot | `meta`, `meta-multi` |
 | [token-activity.md](token-activity.md) | Time-ordered activity for a token | `transfers`, `defi`, `defi-export` |
 | [token-market.md](token-market.md) | DEX pool/market listings for a token or pair | `markets` |
 
@@ -28,3 +29,5 @@ On failure (`400`/`401`/`403`/`429`/`500`), `success` is `false` and `data` is r
 | `errors.message` | string | Human-readable error description, e.g. `"Validation Error: Address [...] is invalid"`. |
 
 `defi-export` is the one exception: its `200 OK` response is a raw CSV string, not this JSON envelope — see [token-activity.md#defi-export](token-activity.md#defi-export).
+
+Live responses also carry a third top-level sibling, `metadata` (undocumented upstream, consistently an empty object `{}` in practice) — don't confuse this envelope-level `metadata` with the `data.metadata` field that `meta`/`meta-multi` return (see [token-info.md](token-info.md)).
