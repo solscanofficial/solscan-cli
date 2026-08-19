@@ -7,7 +7,7 @@ This index only holds the envelope shared by every action. Field-level docs live
 | File | Covers | Actions |
 |------|--------|---------|
 | [token-info.md](token-info.md) | What a token is — identity, supply, authorities, market snapshot | `meta`, `meta-multi` |
-| [token-price.md](token-price.md) | Current spot price/market cap snapshot | `price-latest` |
+| [token-price.md](token-price.md) | Spot and historical price/market cap | `price-latest`, `price-history` |
 | [token-activity.md](token-activity.md) | Time-ordered activity for a token | `transfers`, `defi`, `defi-export` |
 | [token-market.md](token-market.md) | DEX pool/market listings for a token or pair | `markets` |
 
