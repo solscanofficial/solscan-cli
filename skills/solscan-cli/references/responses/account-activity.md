@@ -271,12 +271,12 @@ Each item in `data`:
 | `time` | string | Same instant as `block_time`, as an ISO-8601 string. |
 | `activity_type` | string | One of the `ACTIVITY_*` DeFi enum values (full list in [../account.md](../account.md)) — swap, liquidity, staking, borrowing, bridge, etc. |
 | `from_address` | string | The wallet/account address that initiated the activity. |
-| `to_address` | string | Counterparty address for the activity — e.g. the aggregator/router program for `ACTIVITY_AGG_TOKEN_SWAP`. |
+| `to_address` | string | Counterparty address for the activity — e.g. the aggregator/router program for `ACTIVITY_AGG_TOKEN_SWAP`, `ACTIVITY_TOKEN_SWAP`. |
 | `sources` | array of string | Program address(es) of the underlying pool(s)/venue(s) the activity routed through. |
 | `platform` | string | Address of the top-level protocol/aggregator that the activity is attributed to (e.g. an aggregator's router program). |
-| `amount_info` | object | The swap/transfer amounts for this activity — see below. Shape varies by `activity_type`; fields not relevant to a given activity (e.g. no second leg for a single-sided stake/borrow action) may be absent. |
+| `routers` | object | The swap/transfer amounts for this activity — see below. Shape varies by `activity_type`; fields not relevant to a given activity (e.g. no second leg for a single-sided stake/borrow action) may be absent. |
 
-**`amount_info`** fields:
+**`routers`** fields:
 
 | Field | Type | Description |
 |-------|------|--------------|
@@ -286,9 +286,9 @@ Each item in `data`:
 | `token2` | string | Mint address of the second token (e.g. the token bought in a swap). Absent for activities with no second leg. |
 | `token2_decimals` | number | Decimals for `token2`. |
 | `amount2` | number | Raw amount of `token2` in base units. |
-| `routers` | array of object | The swap path — one entry per pool hop. Same `token1`/`token1_decimals`/`amount1`/`token2`/`token2_decimals`/`amount2` shape as `amount_info` itself, but with amounts as **strings**, plus an optional `child_routers` array of the same shape for aggregator swaps (`ACTIVITY_AGG_TOKEN_SWAP`) that split one trade across multiple underlying pools. |
+| `child_routers` | array of object | The swap path — one entry per pool hop. Same `token1`/`token1_decimals`/`amount1`/`token2`/`token2_decimals`/`amount2` shape as `routers` itself, but with amounts as **strings**, plus an optional `child_routers` array of the same shape for aggregator swaps (`ACTIVITY_AGG_TOKEN_SWAP`, `ACTIVITY_TOKEN_SWAP`) that split one trade across multiple underlying pools. |
 
-**Example** (`ACTIVITY_AGG_TOKEN_SWAP` — an aggregator-routed swap; other `activity_type` values populate `amount_info` more sparsely, see tips below)
+**Example** (`ACTIVITY_AGG_TOKEN_SWAP` — an aggregator-routed swap; other `activity_type` values populate `routers` more sparsely, see tips below)
 
 ```json
 {
@@ -304,7 +304,7 @@ Each item in `data`:
       "to_address": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
       "sources": ["CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK"],
       "platform": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-      "amount_info": {
+      "routers": {
         "token1": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
         "token1_decimals": 6,
         "amount1": 1000000,
@@ -329,10 +329,11 @@ Each item in `data`:
 
 **Interpretation tips**
 
-- Always divide `amount1`/`amount2` (and `routers[].amount1`/`amount2`) by `10 ** token*_decimals` before displaying — these are raw base-unit amounts, not human-readable ones.
-- `routers[].amount1`/`amount2` come back as **strings** while the top-level `amount_info.amount1`/`amount2` are **numbers** — normalize both through a bignum-safe parse rather than assuming one JS type throughout the payload.
-- A single trade routed through an aggregator can fan out into several `routers` entries (one pool hop each), and each of those can further fan out into `child_routers` when the aggregator splits size across parallel pools for the same hop — sum `child_routers` amounts to reconcile against their parent router's `amount1`/`amount2`.
-- Not every `activity_type` populates every `amount_info` field — a single-sided action like `ACTIVITY_SPL_TOKEN_STAKE`, `ACTIVITY_BORROWING`, or `ACTIVITY_TOKEN_DEPOSIT_VAULT` may only have a `token1`/`amount1` leg, with `token2`/`amount2`/`routers` absent rather than an error.
+- Always divide `amount1`/`amount2` (and `child_routers[].amount1`/`amount2`) by `10 ** token*_decimals` before displaying — these are raw base-unit amounts, not human-readable ones.
+- `child_routers[].amount1`/`amount2` come back as **strings** while the top-level `router.amount1`/`amount2` are **numbers** — normalize both through a bignum-safe parse rather than assuming one JS type throughout the payload.
+- A normal swap always has a `routers` object with the aggregate `token1`/`amount1`/`token2`/`amount2` for the whole trade. When the swap is routed through an aggregator, `routers` additionally carries `child_routers` — one entry per underlying sub-swap/pool hop the aggregator combined into that route — so you can reconcile the aggregate amounts against the individual hops that produced them.
+- `child_routers` tracks aggregator routing, not the `activity_type` label — `ACTIVITY_TOKEN_SWAP` (not `ACTIVITY_AGG_TOKEN_SWAP`) yet still has one `child_routers` entry, because `platform` shows it was executed via Jupiter's router. Check `platform`/`sources`/`child_routers` rather than `activity_type` alone to tell whether a given trade was aggregator-routed.
+- Not every `activity_type` populates every `routers` field — a single-sided action like `ACTIVITY_SPL_INIT_MINT`or `ACTIVITY_TOKEN_DEPOSIT_VAULT`,... may only have a `token1`/`amount1` leg, with `token2`/`amount2`/`child_routers` absent rather than an error.
 - `sources` (the pool/venue program(s) touched) and `platform` (the top-level protocol/aggregator attributed for the activity) are different axes — for a direct DEX swap they're often the same address; for an aggregated swap `platform` is the aggregator (e.g. Jupiter) while `sources` lists the underlying pool(s) it routed through.
 - This endpoint has no total/count metadata and no CSV export equivalent documented here beyond `defi-export` (same filters, adds `--platform`, CSV output, rate-limited).
 
@@ -351,12 +352,12 @@ CSV columns (header row is included in the output):
 | `Human Time` | string | Same instant as `Block Time`, as an ISO 8601 date-time (e.g. `2026-05-18T09:36:13.000Z`). Same as `time` on `defi`. |
 | `Action` | string | Short form of `activity_type` with the `ACTIVITY_` prefix stripped and underscores turned into spaces (e.g. `TOKEN SWAP` for `ACTIVITY_TOKEN_SWAP`). Note this differs from `transfer-export`'s `Action` column, which only strips `ACTIVITY_SPL_` and leaves the remaining underscores in place. |
 | `From` | string | The wallet/account address that initiated the activity. Same as `from_address` on `defi`. |
-| `Token1` | string | Mint address of the first token in the activity. Same as `amount_info.token1` on `defi`. |
-| `Amount1` | number | Raw amount of `Token1` in base units — divide by `10 ** TokenDecimals1` for the human-readable amount. Same as `amount_info.amount1` on `defi`. |
-| `TokenDecimals1` | number | Decimals for `Token1`. Same as `amount_info.token1_decimals` on `defi`. |
-| `Token2` | string | Mint address of the second token in the activity. Same as `amount_info.token2` on `defi` — likely blank for single-sided activities (e.g. `ACTIVITY_SPL_TOKEN_STAKE`, `ACTIVITY_BORROWING`) whose JSON equivalent has no second leg, though this hasn't been confirmed against a live single-sided export row. |
-| `Amount2` | number | Raw amount of `Token2` in base units, same caveat as `Amount1`. Same as `amount_info.amount2` on `defi`. |
-| `TokenDecimals2` | number | Decimals for `Token2`. Same as `amount_info.token2_decimals` on `defi`. |
+| `Token1` | string | Mint address of the first token in the activity. Same as `routers.token1` on `defi`. |
+| `Amount1` | number | Raw amount of `Token1` in base units — divide by `10 ** TokenDecimals1` for the human-readable amount. Same as `routers.amount1` on `defi`. |
+| `TokenDecimals1` | number | Decimals for `Token1`. Same as `routers.token1_decimals` on `defi`. |
+| `Token2` | string | Mint address of the second token in the activity. Same as `routers.token2` on `defi` — likely blank for single-sided activities (e.g. `ACTIVITY_SPL_TOKEN_STAKE`, `ACTIVITY_BORROWING`) whose JSON equivalent has no second leg, though this hasn't been confirmed against a live single-sided export row. |
+| `Amount2` | number | Raw amount of `Token2` in base units, same caveat as `Amount1`. Same as `routers.amount2` on `defi`. |
+| `TokenDecimals2` | number | Decimals for `Token2`. Same as `routers.token2_decimals` on `defi`. |
 | `Value` | number | USD value of the activity at the time it happened. |
 | `Platforms` | string | Protocol/aggregator address(es) attributed to the activity — corresponds to `platform` on `defi`. When more than one applies, values are joined with `\|` (pipe). |
 | `Sources` | string | Pool/venue program address(es) the activity routed through — corresponds to `sources` (an array) on `defi`. Same `\|`-joined format as `Platforms` when there's more than one. |
@@ -376,7 +377,7 @@ proVF4pMXVaYqmy4NjniPh4pqKNfMmsihgd4wdkCX3u||whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGf
 
 **Interpretation tips**
 
-- Always divide `Amount1`/`Amount2` by `10 ** TokenDecimals1`/`TokenDecimals2` before displaying, same rule as `amount_info.amount1`/`amount2` on `defi`.
+- Always divide `Amount1`/`Amount2` by `10 ** TokenDecimals1`/`TokenDecimals2` before displaying, same rule as `routers.amount1`/`amount2` on `defi`.
 - The published example row has `Amount1`/`Amount2` both `0` despite a nonzero `Value` — the export can report `0` raw amounts for a swap-like activity while `Value` still reflects the USD size of the trade. Don't treat a `0` amount as "nothing happened," and don't try to derive `Value` from `Amount1`/`Amount2` in this export — they aren't guaranteed to reconcile the way they do on other endpoints.
 - No default time window and no `--page`/`--page-size` (unlike `defi`, which paginates) — pass `--from-time`/`--to-time` to bound a high-activity address instead of relying on the 5000-row cap to truncate cleanly.
 - Split `Platforms`/`Sources` on `|` to recover the list — note a run of `||` is possible (as in the example above) and yields an empty-string element, so don't assume every split segment is a valid address; filter out empties before use.
