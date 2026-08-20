@@ -6,8 +6,6 @@ This covers the **decoded, human-facing actions view** — a pre-summarized "wha
 
 Every field below was verified against live responses from `solscan transaction actions`/`actions-multi` (2026-08-20), not just Solscan's published schema.
 
-> **Native SOL address convention:** wherever this file shows a `token_address` field — `transfers[].token_address`, `transfers[].base_value.token_address`, or a `token_1`/`token_2`/`token_address` inside `activities[].data`/`one_line_summary.data` — native SOL is represented by the placeholder mint `So11111111111111111111111111111111111111111` (45 characters). This is **not** the real wrapped-SOL mint `So11111111111111111111111111111111111111112` (44 characters, one fewer `1`) — that address shows up separately when a transfer actually moves tokenized/wrapped SOL as an SPL token (e.g. inside a swap). Confirm which is meant by checking `program_id`: `11111111111111111111111111111111` (System Program) means native SOL; `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA` (SPL Token program) means an actual SPL-token transfer, wrapped SOL included.
-
 ## Contents
 
 - [`actions`](#actions)
