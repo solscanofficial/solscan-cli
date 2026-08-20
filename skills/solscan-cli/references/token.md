@@ -44,11 +44,15 @@ Transfer/DeFi `--activity-type` enums are the same lists as in [account.md](acco
 
 **`list`**: `--sort-by` `holder`\|`market_cap`(default)\|`created_time` · `--page-size` `10/20/30/40/60/100`.
 
+**`trending`**: `--limit` (default `10`, max `100`) - no sort/filter flags. Response rows are identity-only (`address`/`decimals`/`name`/`symbol`) — thinner than `list`/`top`, which also carry `market_cap`/`price`/`holder`; see [responses/token-list.md](responses/token-list.md#trending).
+
+**`top`**: takes **no options at all** — no pagination, sorting, or limit flag; the API returns a fixed top-N list.
+
 **`latest`**: `--platform-id` one of `jupiter`, `lifinity`, `meteora`, `orca`, `raydium`, `phoenix`, `sanctum`, `kamino`, `pumpfun`, `openbook`, `apepro`, `stabble`, `jupiterdca`, `jupiter_limit_order`, `solfi`, `zerofi`, `letsbonkfun_launchpad`, `raydium_launchlab`, `believe_launchpad`, `moonshot_launchpad`, `jup_studio_launchpad`, `bags_launchpad`. `--page-size` `10/20/30/40/60/100`.
 
 ## Response Fields
 
-Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`).
+Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`, `trending`).
 
 ## Examples
 

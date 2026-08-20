@@ -1,14 +1,15 @@
-# Token Response Fields — List / Top
+# Token Response Fields — List / Top / Trending
 
-Field-by-field description of the JSON the `token list` and `token top` commands return. Read this when you need to interpret or extract specific fields from a response, not when you're just building the command (see [../token.md](../token.md) for flags/params). Shared envelope/error shape: [token.md](token.md#common-envelope).
+Field-by-field description of the JSON the `token list`, `token top`, and `token trending` commands return. Read this when you need to interpret or extract specific fields from a response, not when you're just building the command (see [../token.md](../token.md) for flags/params). Shared envelope/error shape: [token.md](token.md#common-envelope).
 
-This covers **bulk token snapshots** — paginated/ranked listings of many tokens at once, each row a lightweight market summary — as opposed to full single-token detail ([token-info.md](token-info.md), which has far more fields per token).
+This covers **bulk token snapshots** — paginated/ranked listings of many tokens at once — as opposed to full single-token detail ([token-info.md](token-info.md), which has far more fields per token). `list` and `top` share one full market-summary row shape; `trending` returns a much thinner identity-only row — don't assume it carries `price`/`market_cap`/`holder` just because `list`/`top` do.
 
 ## Contents
 
 - [`list`](#list)
 - [`top`](#top)
-- [Shared item fields](#shared-item-fields)
+- [Shared item fields (`list` / `top`)](#shared-item-fields-list--top)
+- [`trending`](#trending)
 
 > Only actions with a confirmed field-level source are documented here. If the action you need isn't listed yet, fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
 
@@ -16,7 +17,7 @@ This covers **bulk token snapshots** — paginated/ranked listings of many token
 
 `solscan token list [--sort-by <field>] [--sort-order <order>] [--page <n>] [--page-size <n>]`
 
-Supports up to 50,000 items across a full paginated crawl. `data` is a **flat array** of token summary objects (see [Shared item fields](#shared-item-fields) below) — unlike `top`, there's no wrapping `total`/`items` object, and no metadata about how many pages exist. Page by incrementing `--page` until a response comes back with fewer rows than `--page-size`.
+Supports up to 50,000 items across a full paginated crawl. `data` is a **flat array** of token summary objects (see [Shared item fields](#shared-item-fields-list--top) below) — unlike `top`, there's no wrapping `total`/`items` object, and no metadata about how many pages exist. Page by incrementing `--page` until a response comes back with fewer rows than `--page-size`.
 
 `--sort-by` accepts `holder` \| `market_cap` \| `created_time`; `--sort-order` accepts `asc` \| `desc`. Both are optional — omit them and the API applies its own default order.
 
@@ -50,7 +51,7 @@ Supports up to 50,000 items across a full paginated crawl. `data` is a **flat ar
 | Field | Type | Description |
 |-------|------|--------------|
 | `total` | number | Count of tokens returned in `items` (Solscan's published example shows a fixed small top-N list, not a paginated total). |
-| `items` | array of object | The ranked token summaries — see [Shared item fields](#shared-item-fields). |
+| `items` | array of object | The ranked token summaries — see [Shared item fields](#shared-item-fields-list--top). |
 
 **Example** (per [Solscan's published reference](https://pro-api.solscan.io/v2.0/token/top); not independently captured live):
 
@@ -77,7 +78,7 @@ Supports up to 50,000 items across a full paginated crawl. `data` is a **flat ar
 }
 ```
 
-## Shared item fields
+## Shared item fields (`list` / `top`)
 
 Both actions return the same per-token shape — `list` at the top level of `data`, `top` inside `data.items`:
 
@@ -98,3 +99,40 @@ Both actions return the same per-token shape — `list` at the top level of `dat
 
 - These rows are intentionally thin — a fast bulk snapshot for ranking/sorting many tokens, not full token detail. For everything else about a specific token (supply, authorities, off-chain metadata, `market_cap_rank`, volume, etc.) follow up with `token meta --address <address>` — see [token-info.md](token-info.md).
 - `list` and `top` pull from the same underlying market-data snapshot as `token trending` and the market-data fields on `token meta` (`price`, `market_cap`, `price_24h_change`/`price_change_24h`) — don't be surprised if numbers line up closely across commands, modulo cache staleness between calls.
+
+## `trending`
+
+`solscan token trending [--limit <n>]` — the only param is `--limit` (optional, default `10`, max `100`, how many tokens to return) and no sort/filter flags — the API decides what counts as "trending" and in what order.
+
+`data` is a **flat array**, like `list` — but each row is much thinner than the `list`/`top` shape above:
+
+| Field | Type | Description |
+|-------|------|--------------|
+| `address` | string | The token's mint address. |
+| `decimals` | number | Decimals used to convert any raw base-unit amount for this token into a human-readable one. |
+| `name` | string | Token name. |
+| `symbol` | string | Token ticker symbol. |
+
+That's the whole row — **no `market_cap`, `price`, `price_24h_change`, `holder`, or `created_time`**, unlike `list`/`top`'s [shared item fields](#shared-item-fields-list--top). If you need market data for a trending token, follow up with `token meta --address <address>` ([token-info.md](token-info.md)) or look the same address up via `token top`/`token list`.
+
+**Example**:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "address": "CL4KcMhPpEeNmR7rK7RHsLSTqshoYpasSxHHhduamfe6",
+      "decimals": 9,
+      "name": "Owners Casino Online",
+      "symbol": "OCO"
+    },
+    {
+      "address": "Gouk6Q1JyrHJXymfb7KFJkBtZGDdxmGctu9T14zRpNWu",
+      "decimals": 9,
+      "name": "DopaMeme",
+      "symbol": "DOPA"
+    }
+  ]
+}
+```

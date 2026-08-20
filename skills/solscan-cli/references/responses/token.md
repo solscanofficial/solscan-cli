@@ -11,7 +11,7 @@ This index only holds the envelope shared by every action. Field-level docs live
 | [token-activity.md](token-activity.md) | Time-ordered activity for a token | `transfers`, `defi`, `defi-export` |
 | [token-market.md](token-market.md) | DEX pool/market listings for a token or pair | `markets` |
 | [token-holders.md](token-holders.md) | Holder distribution and ranking | `holders` |
-| [token-list.md](token-list.md) | Bulk token snapshots — paginated/ranked listings | `list`, `top` |
+| [token-list.md](token-list.md) | Bulk token snapshots — paginated/ranked listings | `list`, `top`, `trending` |
 
 > Only actions with a confirmed field-level source are documented in those files. If the action you need isn't listed yet, fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
 
