@@ -7,8 +7,10 @@ This index only holds the envelope shared by every action. Field-level docs live
 | File | Covers | Actions |
 |------|--------|---------|
 | [transaction-last.md](transaction-last.md) | The most recent transactions on the network — summary shape, not full detail | `last` |
+| [transaction-detail.md](transaction-detail.md) | Full parsed transaction detail — balance changes, top-level fields, envelope `metadata.tokens` | `detail`, `detail-multi` |
+| [transaction-instructions.md](transaction-instructions.md) | The recursive `parsed_instructions`/`inner_instructions` tree (activities, transfers, IDL args) referenced from `transaction-detail.md` | `detail`, `detail-multi` |
 
-> Only actions with a confirmed field-level source are documented so far. `detail`/`detail-multi`/`actions`/`actions-multi`/`fees` aren't covered yet — fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
+> Only actions with a confirmed field-level source are documented so far. `actions`/`actions-multi`/`fees` aren't covered yet — fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
 
 ## Common envelope
 
