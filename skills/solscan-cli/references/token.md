@@ -48,11 +48,11 @@ Transfer/DeFi `--activity-type` enums are the same lists as in [account.md](acco
 
 **`top`**: takes **no options at all** — no pagination, sorting, or limit flag; the API returns a fixed top-N list.
 
-**`latest`**: `--platform-id` one of `jupiter`, `lifinity`, `meteora`, `orca`, `raydium`, `phoenix`, `sanctum`, `kamino`, `pumpfun`, `openbook`, `apepro`, `stabble`, `jupiterdca`, `jupiter_limit_order`, `solfi`, `zerofi`, `letsbonkfun_launchpad`, `raydium_launchlab`, `believe_launchpad`, `moonshot_launchpad`, `jup_studio_launchpad`, `bags_launchpad`. `--page-size` `10/20/30/40/60/100`.
+**`latest`**: `--platform-id` one of `jupiter`, `lifinity`, `meteora`, `orca`, `raydium`, `phoenix`, `sanctum`, `kamino`, `pumpfun`, `openbook`, `apepro`, `stabble`, `jupiterdca`, `jupiter_limit_order`, `solfi`, `zerofi`, `letsbonkfun_launchpad`, `raydium_launchlab`, `believe_launchpad`, `moonshot_launchpad`, `jup_studio_launchpad`, `bags_launchpad`. `--page-size` `10/20/30/40/60/100`. Response rows are the `list`/`top` shape plus `platform`/`creator`, but `price_24h_change`/`holder` aren't guaranteed present (a freshly-created token may not have them tracked yet) — see [responses/token-list.md](responses/token-list.md#latest).
 
 ## Response Fields
 
-Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`, `trending`).
+Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`, `trending`, `latest`).
 
 ## Examples
 

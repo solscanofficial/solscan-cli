@@ -1,8 +1,8 @@
-# Token Response Fields — List / Top / Trending
+# Token Response Fields — List / Top / Trending / Latest
 
-Field-by-field description of the JSON the `token list`, `token top`, and `token trending` commands return. Read this when you need to interpret or extract specific fields from a response, not when you're just building the command (see [../token.md](../token.md) for flags/params). Shared envelope/error shape: [token.md](token.md#common-envelope).
+Field-by-field description of the JSON the `token list`, `token top`, `token trending`, and `token latest` commands return. Read this when you need to interpret or extract specific fields from a response, not when you're just building the command (see [../token.md](../token.md) for flags/params). Shared envelope/error shape: [token.md](token.md#common-envelope).
 
-This covers **bulk token snapshots** — paginated/ranked listings of many tokens at once — as opposed to full single-token detail ([token-info.md](token-info.md), which has far more fields per token). `list` and `top` share one full market-summary row shape; `trending` returns a much thinner identity-only row — don't assume it carries `price`/`market_cap`/`holder` just because `list`/`top` do.
+This covers **bulk token snapshots** — paginated/ranked listings of many tokens at once — as opposed to full single-token detail ([token-info.md](token-info.md), which has far more fields per token). `list` and `top` share one full market-summary row shape; `trending` returns a much thinner identity-only row; `latest` sits in between — don't assume any of the three carry exactly the same fields as another without checking its section below.
 
 ## Contents
 
@@ -10,6 +10,7 @@ This covers **bulk token snapshots** — paginated/ranked listings of many token
 - [`top`](#top)
 - [Shared item fields (`list` / `top`)](#shared-item-fields-list--top)
 - [`trending`](#trending)
+- [`latest`](#latest)
 
 > Only actions with a confirmed field-level source are documented here. If the action you need isn't listed yet, fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
 
@@ -136,3 +137,37 @@ That's the whole row — **no `market_cap`, `price`, `price_24h_change`, `holder
   ]
 }
 ```
+
+## `latest`
+
+`solscan token latest [--platform-id <platform>] [--page <n>] [--page-size <n>]` — all three params are optional: `--platform-id` filters to tokens created on a specific launch platform/DEX (see the enum in [../token.md](../token.md)); `--page`/`--page-size` (`10/20/30/40/60/100`, default `10`) paginate newest-first.
+
+`data` is a **flat array**, like `list`. Each row is the [shared `list`/`top` item shape](#shared-item-fields-list--top) plus two extra fields, but — unlike `list`/`top` — the upstream schema does **not guarantee `price_24h_change` or `holder`** on every row (a token seconds old may not have either tracked yet):
+
+| Field | Type | Description |
+|-------|------|--------------|
+| `platform` | string | The launch platform/DEX the token was created on — one of the `--platform-id` enum values (e.g. `letsbonkfun_launchpad`, `pumpfun`). |
+| `creator` | string | The mint's creator address. Same field as `list`'s optional `creator` — see [Shared item fields](#shared-item-fields-list--top). |
+
+**Example**:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "address": "8Vo291C45s1dHdERZ3tYZ2rEMwPjqwSBiMbAFnEEbonk",
+      "decimals": 6,
+      "name": "This Coin Is Listed As A Stock",
+      "symbol": "STOCKCOIN",
+      "market_cap": 4507.842427290896,
+      "price": 0.000004507842427290896,
+      "created_time": 1754411003,
+      "platform": "letsbonkfun_launchpad",
+      "creator": "t9Qz6FDpUw5QrXCXdoEosXfVv8Mg7YyKeZoe3Eur4ET"
+    }
+  ]
+}
+```
+
+Note this real example omits `price_24h_change` and `holder` even though the upstream schema lists them as possible fields on `latest` rows — treat both as optional here, not as a sign of a malformed response.
