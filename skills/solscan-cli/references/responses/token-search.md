@@ -48,7 +48,7 @@ This covers **keyword/address search results** — a paginated, ranked list of t
 | `price_change_24h` | number | Percentage price change over the last 24h (e.g. `-3.15722` means -3.16%, not a fractional multiple). |
 | `total_dex_vol_24h` | number | Trading volume in USD over the last 24h specifically on Solana DEXs. |
 | `dex_vol_change_24h` | number | Percentage change in `total_dex_vol_24h` vs. the prior 24h window. |
-| `is_verified` | boolean | Whether the token is verified. Corresponds to the `--exclude-unverified` filter — pass that flag to only get `true` rows back instead of filtering client-side. |
+| `is_verified` | boolean | Whether the token is verified. `true` when the token's Solscan reputation is **`OK`** or **`Neutral`** — reputations below that (e.g. flagged/spam) come back `false`. Corresponds to the `--exclude-unverified` filter — pass that flag to only get `true` rows back instead of filtering client-side. |
 
 **Example** (per [Solscan's published reference](https://pro-api.solscan.io/v2.0/token/search)):
 
@@ -97,6 +97,6 @@ This covers **keyword/address search results** — a paginated, ranked list of t
 ## Interpretation tips
 
 - Unlike `list`/`top`, rows here aren't a thin snapshot — they carry the same market-data fields (`price`, `volume_24h`, `market_cap`, `market_cap_rank`, `price_change_24h`, `total_dex_vol_24h`, `dex_vol_change_24h`) plus full creation provenance (`creator`/`create_tx`/`created_time`/`first_mint_tx`/`first_mint_time`) and metadata in one call — often enough to skip a follow-up `token meta` lookup entirely.
-- `--sort-by reputation` (the default) has no corresponding `reputation` field in the response — it's a server-side ranking signal (verification status, activity, etc.), not something exposed for you to read back.
+- `--sort-by reputation` (the default) has no corresponding `reputation` field in the response — the closest visible proxy is `is_verified` (`true` for Solscan reputation `OK`/`Neutral`), but the underlying ranking signal itself (including lower tiers like flagged/spam) isn't exposed for you to read back.
 - If you need supply-inflation or freeze risk (`mint_authority`/`freeze_authority`) or Token-2022 extension data, `search` doesn't carry them — follow up with `token meta --address <address>` ([token-info.md](token-info.md)).
 - `total` being capped at 10,000 means very broad `--keyword` values (e.g. a single common letter with `--search-mode fuzzy`) will silently truncate — narrow the keyword or add `--search-by`/`--exclude-unverified` filters instead of trying to page past that ceiling.
