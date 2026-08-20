@@ -40,7 +40,7 @@ Transfer/DeFi `--activity-type` enums are the same lists as in [account.md](acco
 
 **`historical`**: `--range` `7`\|`30` days only — no other flags. Returns a daily time series, not a live snapshot — no `price` field here (unlike `meta`/`price-latest`); see [responses/token-historical.md](responses/token-historical.md).
 
-**`search`**: `--search-mode` `exact`(default)\|`fuzzy` · `--search-by` `combination`(default)\|`address`\|`name`\|`symbol` · `--exclude-unverified` boolean flag · `--sort-by` `reputation`(default)\|`market_cap`\|`volume_24h` · `--page-size` `10/20/30/40`.
+**`search`**: `--search-mode` `exact`(default)\|`fuzzy` · `--search-by` `combination`(default)\|`address`\|`name`\|`symbol` · `--exclude-unverified` boolean flag · `--sort-by` `reputation`(default)\|`market_cap`\|`volume_24h` · `--sort-order` `asc`\|`desc`(default) · `--page-size` `10/20/30/40`(default `10`). `total` in the response is capped at 10,000 matches regardless of how many actually match — see [responses/token-search.md](responses/token-search.md).
 
 **`list`**: `--sort-by` `holder`\|`market_cap`(default)\|`created_time` · `--page-size` `10/20/30/40/60/100`.
 
@@ -52,7 +52,7 @@ Transfer/DeFi `--activity-type` enums are the same lists as in [account.md](acco
 
 ## Response Fields
 
-Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`, `trending`, `latest`) / [responses/token-historical.md](responses/token-historical.md) (`historical`).
+Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`, `trending`, `latest`) / [responses/token-historical.md](responses/token-historical.md) (`historical`) / [responses/token-search.md](responses/token-search.md) (`search`).
 
 ## Examples
 
