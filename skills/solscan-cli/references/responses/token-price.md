@@ -1,6 +1,6 @@
 # Token Response Fields — Price
 
-Field-by-field description of the JSON the `token price-latest` and `token price-history` commands return. Read this when you need to interpret or extract specific fields from a response, not when you're just building the command (see [../token.md](../token.md) for flags/params). Shared envelope/error shape: [token.md](token.md#common-envelope).
+Field-by-field description of the JSON the `token price-latest`, `token price-history`, `token price`, and `token price-multi` commands return. Read this when you need to interpret or extract specific fields from a response, not when you're just building the command (see [../token.md](../token.md) for flags/params). Shared envelope/error shape: [token.md](token.md#common-envelope).
 
 This covers **spot and historical price** for one or more tokens — lighter-weight than [`meta`/`meta-multi`](token-info.md#meta--meta-multi), which also returns a price field alongside full token identity/supply data.
 
@@ -8,8 +8,8 @@ This covers **spot and historical price** for one or more tokens — lighter-wei
 
 - [`price-latest`](#price-latest)
 - [`price-history`](#price-history)
-
-> Only actions with a confirmed field-level source are documented here. `price` and `price-multi` (the deprecated single/multi price-history actions) aren't covered yet — fall back to `--no-json` output or `--help` for those.
+- [`price` (deprecated)](#price-deprecated)
+- [`price-multi` (deprecated)](#price-multi-deprecated)
 
 ## `price-latest`
 
@@ -111,3 +111,73 @@ Each entry in `prices`:
 - One `prices` entry per calendar day in range — with a wide `--from-time`/`--to-time` span and `--addresses` near the 50-token cap, the response can get large; narrow the date window if you only need a recent slice.
 - Same **whole-request-fails** behavior as `price-latest`: one invalid address in `--addresses` returns `400` (`errors.code`) for the entire call rather than a partial result.
 - `date`/`price` inside `prices` are unrelated to `price-latest`'s `updated_time`/`price_change_24h` — this action reports a flat historical series with no percentage-change field; compute deltas yourself from adjacent `prices` entries if needed.
+
+## `price` (deprecated)
+
+`solscan token price --address <TOKEN_ADDRESS> [--from-time <YYYYMMDD>] [--to-time <YYYYMMDD>]` — **deprecated**, use `price-history` instead (same underlying data, multi-address).
+
+Single-address, single-token equivalent of `price-history` — `--from-time`/`--to-time` are the same optional `YYYYMMDD` integers, omit them for the API's default window. Because only one address is ever queried, `data` skips `price-history`'s per-address wrapper entirely: it's a **flat array** of daily price points directly, not an array containing one `token_address`/`prices` object.
+
+| Field | Type | Description |
+|-------|------|--------------|
+| `date` | number | Date as a `YYYYMMDD` integer (e.g. `20240717`) — same format as `price-history`'s nested `prices[].date`. |
+| `price` | number | Token price in USD on that date. |
+
+**Example** (per [Solscan's published reference](https://pro-api.solscan.io/v2.0/token/price)):
+
+```json
+{
+  "success": true,
+  "data": [
+    { "date": 20240717, "price": 0.895604 },
+    { "date": 20240718, "price": 0.962621 },
+    { "date": 20240719, "price": 0.953814 }
+  ]
+}
+```
+
+**Interpretation tips**
+
+- Don't confuse this flat `data` array with `price-history`'s array-of-per-address-objects — code written generically against both actions needs to branch on which one was called, not just check `Array.isArray(data)` (both are arrays, but at different nesting depths).
+- No `token_address`/`address` field appears anywhere in the response — since the request only ever covers one token, the caller already knows which address the series belongs to from the `--address` it passed.
+- Same deprecation status as `price-multi`: Solscan recommends migrating to `price-history` (which covers both single- and multi-address cases via `--addresses`), so treat `price` as a thin compatibility shim rather than reaching for it in new code.
+
+## `price-multi` (deprecated)
+
+`solscan token price-multi --addresses <TOKEN_ADDRESS,...> [--from-time <YYYYMMDD>] [--to-time <YYYYMMDD>]` (max 50 addresses) — **deprecated**, use `price-history` instead.
+
+The response is **byte-for-byte the same shape as [`price-history`](#price-history)**: `data` is an array, one object per address in the order requested, each with `token_address` and a nested `prices` array of `{date, price}` points. See the [`price-history` field table](#price-history) above for the full field-by-field breakdown — it applies here unchanged.
+
+**Example** (per [Solscan's published reference](https://pro-api.solscan.io/v2.0/token/price/multi), trimmed to 2 of 3 tokens):
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "token_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "prices": [
+        { "date": 20250326, "price": 1.0000327 },
+        { "date": 20250327, "price": 0.9999533 },
+        { "date": 20250401, "price": 0.999944 },
+        { "date": 20250402, "price": 1 }
+      ]
+    },
+    {
+      "token_address": "So11111111111111111111111111111111111111112",
+      "prices": [
+        { "date": 20250326, "price": 137.1231 },
+        { "date": 20250327, "price": 138.29248 },
+        { "date": 20250401, "price": 126.78 },
+        { "date": 20250402, "price": 124.43755 }
+      ]
+    }
+  ]
+}
+```
+
+**Interpretation tips**
+
+- `price-multi` and `price-history` aren't just similarly-shaped — they're the deprecated and current names for the *identical* endpoint response. If you already handle `price-history`'s output, `price-multi`'s needs zero extra parsing logic.
+- Same **whole-request-fails** behavior as the other price actions: one invalid address in `--addresses` returns `400` (`errors.code`) for the entire call rather than a partial result.
+- Prefer `price-history` in new code — `price-multi` exists only for backward compatibility and Solscan may retire it entirely at some point (deprecated endpoints carry no removal-date guarantee).

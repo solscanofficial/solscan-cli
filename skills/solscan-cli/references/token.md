@@ -52,7 +52,7 @@ Transfer/DeFi `--activity-type` enums are the same lists as in [account.md](acco
 
 ## Response Fields
 
-Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`, `trending`, `latest`) / [responses/token-historical.md](responses/token-historical.md) (`historical`) / [responses/token-search.md](responses/token-search.md) (`search`).
+Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`, `price`, `price-multi`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`, `trending`, `latest`) / [responses/token-historical.md](responses/token-historical.md) (`historical`) / [responses/token-search.md](responses/token-search.md) (`search`).
 
 ## Examples
 
