@@ -15,9 +15,9 @@ solscan transaction <action> [options]
 
 ## Option details
 
-**`detail`/`actions`**: `--signature` length 30–100 chars, required. `detail`'s response is the full parsed shape — SOL/SPL balance changes, per-instruction breakdown (including nested CPI instructions), decoded activities/transfers, raw IDL args — full field-by-field breakdown: [responses/transaction-detail.md](responses/transaction-detail.md) (outer shape) + [responses/transaction-instructions.md](responses/transaction-instructions.md) (`parsed_instructions` tree).
+**`detail`/`actions`**: `--signature` length 30–100 chars, required. `detail`'s response is the full parsed shape — SOL/SPL balance changes, per-instruction breakdown (including nested CPI instructions), decoded activities/transfers, raw IDL args — full field-by-field breakdown: [responses/transaction-detail.md](responses/transaction-detail.md) (outer shape) + [responses/transaction-instructions.md](responses/transaction-instructions.md) (`parsed_instructions` tree). `actions`' response is the smaller, pre-decoded "what happened" view (`one_line_summary`, grouped `summaries`, flat `transfers`/`activities`) — full field-by-field breakdown: [responses/transaction-actions.md](responses/transaction-actions.md).
 
-**`detail-multi`/`actions-multi`**: `--signatures` comma-separated, max 50, each 30–100 chars. `detail-multi`'s `data` is an array of the exact same per-transaction shape as `detail`, one entry per signature in request order — see [responses/transaction-detail.md](responses/transaction-detail.md#detail-multi).
+**`detail-multi`/`actions-multi`**: `--signatures` comma-separated, max 50, each 30–100 chars. `detail-multi`'s `data` is an array of the exact same per-transaction shape as `detail`, one entry per signature in request order — see [responses/transaction-detail.md](responses/transaction-detail.md#detail-multi). `actions-multi`'s `data` is likewise an array in request order of the same shape as `actions`, but `metadata.tokens` is a single map shared across the whole batch, not one per transaction — see [responses/transaction-actions.md](responses/transaction-actions.md#actions-multi).
 
 **`last`**: `--limit` `10/20/30/40/60/100` (default `10`) · `--filter` `exceptVote`(default)\|`all` controls whether consensus vote transactions are included. Response is a flat, unpaginated array of transaction summaries (slot/fee/status/signer/instructions), not full detail — full field-by-field breakdown: [responses/transaction-last.md](responses/transaction-last.md).
 
@@ -25,7 +25,7 @@ Use `actions`/`actions-multi` when the user wants "what happened in this tx" —
 
 ## Response Fields
 
-Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/transaction.md](responses/transaction.md) (index + shared envelope) → [responses/transaction-last.md](responses/transaction-last.md) (`last`) / [responses/transaction-detail.md](responses/transaction-detail.md) (`detail`, `detail-multi`) / [responses/transaction-instructions.md](responses/transaction-instructions.md) (nested `parsed_instructions` tree).
+Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/transaction.md](responses/transaction.md) (index + shared envelope) → [responses/transaction-last.md](responses/transaction-last.md) (`last`) / [responses/transaction-detail.md](responses/transaction-detail.md) (`detail`, `detail-multi`) / [responses/transaction-instructions.md](responses/transaction-instructions.md) (nested `parsed_instructions` tree) / [responses/transaction-actions.md](responses/transaction-actions.md) (`actions`, `actions-multi`).
 
 ## Examples
 
