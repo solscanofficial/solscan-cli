@@ -21,11 +21,13 @@ solscan transaction <action> [options]
 
 **`last`**: `--limit` `10/20/30/40/60/100` (default `10`) · `--filter` `exceptVote`(default)\|`all` controls whether consensus vote transactions are included. Response is a flat, unpaginated array of transaction summaries (slot/fee/status/signer/instructions), not full detail — full field-by-field breakdown: [responses/transaction-last.md](responses/transaction-last.md).
 
+**`fees`**: No options — takes no flags. Response is a single flat object with `avg_fee`/`min_fee`/`max_fee`, a network-wide snapshot (not scoped to any account or transaction), values in **SOL** (not lamports) — full field-by-field breakdown: [responses/transaction-fees.md](responses/transaction-fees.md).
+
 Use `actions`/`actions-multi` when the user wants "what happened in this tx" — it's already decoded into human terms. Use `detail`/`detail-multi` when you need raw balance-change/instruction-level data. Note `detail`'s `status` is numeric (`1`/`0`) while `last`'s `status` is a string (`"Success"`/`"Fail"`) — don't branch on it generically across actions.
 
 ## Response Fields
 
-Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/transaction.md](responses/transaction.md) (index + shared envelope) → [responses/transaction-last.md](responses/transaction-last.md) (`last`) / [responses/transaction-detail.md](responses/transaction-detail.md) (`detail`, `detail-multi`) / [responses/transaction-instructions.md](responses/transaction-instructions.md) (nested `parsed_instructions` tree) / [responses/transaction-actions.md](responses/transaction-actions.md) (`actions`, `actions-multi`).
+Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/transaction.md](responses/transaction.md) (index + shared envelope) → [responses/transaction-last.md](responses/transaction-last.md) (`last`) / [responses/transaction-detail.md](responses/transaction-detail.md) (`detail`, `detail-multi`) / [responses/transaction-instructions.md](responses/transaction-instructions.md) (nested `parsed_instructions` tree) / [responses/transaction-actions.md](responses/transaction-actions.md) (`actions`, `actions-multi`) / [responses/transaction-fees.md](responses/transaction-fees.md) (`fees`).
 
 ## Examples
 

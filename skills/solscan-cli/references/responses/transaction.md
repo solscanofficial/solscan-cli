@@ -10,8 +10,7 @@ This index only holds the envelope shared by every action. Field-level docs live
 | [transaction-detail.md](transaction-detail.md) | Full parsed transaction detail — balance changes, top-level fields, envelope `metadata.tokens` | `detail`, `detail-multi` |
 | [transaction-instructions.md](transaction-instructions.md) | The recursive `parsed_instructions`/`inner_instructions` tree (activities, transfers, IDL args) referenced from `transaction-detail.md` | `detail`, `detail-multi` |
 | [transaction-actions.md](transaction-actions.md) | Decoded actions view — `one_line_summary`, `summaries`, flat `transfers`/`activities`, envelope `metadata.tokens` | `actions`, `actions-multi` |
-
-> `fees` isn't covered yet — fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
+| [transaction-fees.md](transaction-fees.md) | Network-wide fee snapshot — `avg_fee`/`min_fee`/`max_fee`, in SOL | `fees` |
 
 ## Common envelope
 
