@@ -16,6 +16,10 @@ solscan program <action> [options]
 
 **`analytics`**: `--address` minimum 30 chars, required · `--range` `7`\|`30` days, required.
 
+## Response Fields
+
+Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/program.md](responses/program.md) (index + shared envelope) → [responses/program-list.md](responses/program-list.md) (`list`) / [responses/program-popular.md](responses/program-popular.md) (`popular`) / [responses/program-analytics.md](responses/program-analytics.md) (`analytics`).
+
 ## Examples
 
 ```bash

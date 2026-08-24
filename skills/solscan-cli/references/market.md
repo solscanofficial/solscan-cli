@@ -21,7 +21,7 @@ solscan market <action> [options]
 
 **`positions`**: `--address` is the pool address; each row is one liquidity deposit a user made into that pool (a wallet can have several), not one row per wallet. `--sort-by` `position_value`(default)\|`created_time` · `--page-size` `10/20/30/40` · `--in-range <true|false>` filters to in-range or out-of-range positions (in range = current price is between the position's lower/upper price bounds); omit to return both. Response is an array of CLMM-style LP positions for the pool — full field-by-field breakdown: [responses/market-positions.md](responses/market-positions.md).
 
-## Response field docs
+## Response Fields
 
 Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/market.md](responses/market.md) (index + shared envelope) → [responses/market-list.md](responses/market-list.md) (`list`) / [responses/market-info.md](responses/market-info.md) (`info`) / [responses/market-volume.md](responses/market-volume.md) (`volume`) / [responses/market-positions.md](responses/market-positions.md) (`positions`). Read the relevant file before writing code that parses a response — a few fields differ from what Solscan's own published schema names (details noted in each file).
 
