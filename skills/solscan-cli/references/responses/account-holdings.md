@@ -25,7 +25,7 @@ Unlike the array-shaped list actions above, `data` is a **single object** — a 
 | `total_value` | number | Sum of `native_balance.value` + every `tokens[].value`, in USD. Does **not** include `positions[].position_value` — LP position value is reported separately and isn't folded into this total. |
 | `native_balance` | object | The address's native SOL balance, priced. Same field shape as one entry of `tokens` (see below), minus `token_address`/`balance_str`. |
 | `tokens` | array of object | One entry per SPL token held (nonzero balance), each priced in USD. |
-| `positions` | array of object | Open liquidity/LP positions across supported DEX programs (e.g. Whirlpool). Not the same as a `tokens` entry — an LP position is a derivative claim on a pool, not a plain token balance. |
+| `positions` | array of object | Open liquidity/LP positions across supported DEX programs (e.g. Whirlpool). Not the same as a `tokens` entry — an LP position is a derivative claim on a pool, not a plain token balance. This is the wallet-scoped view of the same positions `market positions --address <POOL>` lists pool-scoped — see [market-positions.md](market-positions.md). |
 
 `native_balance` / each `tokens[]` entry:
 

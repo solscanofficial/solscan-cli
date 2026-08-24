@@ -61,7 +61,7 @@ export function registerMarketCommand(program) {
     .option('--page-size <number>', 'Items per page (10, 20, 30, 40)', '10')
     .option('--sort-by <field>', 'Sort field: position_value | created_time', 'position_value')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
-    .option('--in-range', 'Filter positions that are in range')
+    .option('--in-range <boolean>', 'Filter positions: true (in range) | false (out of range)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const params = {
@@ -71,7 +71,7 @@ export function registerMarketCommand(program) {
         sort_by: opts.sortBy,
       };
       if (opts.sortOrder) params.sort_order = opts.sortOrder;
-      if (opts.inRange) params.in_range = true;
+      if (opts.inRange !== undefined) params.in_range = opts.inRange === 'true';
       const data = await makeRequest('/market/positions', params, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });
