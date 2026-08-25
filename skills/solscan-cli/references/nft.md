@@ -27,6 +27,10 @@ ACTIVITY_NFT_CANCEL_LIST ACTIVITY_NFT_REJECT_BID ACTIVITY_NFT_UPDATE_PRICE ACTIV
 
 **`items`**: `--collection` required · `--sort-by` `last_trade`(default)\|`listing_price` · `--page-size` `12/24/36` (default `12`).
 
+## Response Fields
+
+Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/nft.md](responses/nft.md) (index + shared envelope) → [responses/nft-news.md](responses/nft-news.md) (`news`) / [responses/nft-activities.md](responses/nft-activities.md) (`activities`) / [responses/nft-collections.md](responses/nft-collections.md) (`collections`) / [responses/nft-items.md](responses/nft-items.md) (`items`). Read the relevant file before writing code that parses a response — several fields differ in casing (`snake_case` vs `camelCase`) or type (string vs number) between actions that otherwise look structurally similar.
+
 ## Examples
 
 ```bash
