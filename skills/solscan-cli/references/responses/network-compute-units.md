@@ -6,7 +6,7 @@ This covers **daily network-wide compute unit consumption** — the total execut
 
 ## `compute-units`
 
-`solscan network compute-units [--range <days>] [--from-time <YYYYMMDD>] [--to-time <YYYYMMDD>]`
+`solscan network compute-units [--range <days>] [--from-date <YYYYMMDD>] [--to-date <YYYYMMDD>]`
 
 `data.series` is an array with one row per day; each row carries a single count.
 

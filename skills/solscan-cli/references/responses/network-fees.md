@@ -6,7 +6,7 @@ This covers **daily network-wide transaction fee totals** — as opposed to one 
 
 ## `fees`
 
-`solscan network fees [--range <days>] [--from-time <YYYYMMDD>] [--to-time <YYYYMMDD>]`
+`solscan network fees [--range <days>] [--from-date <YYYYMMDD>] [--to-date <YYYYMMDD>]`
 
 `data.series` is an array with one row per day; each row splits fees into base vs. priority, each in both SOL and USD, plus the combined total.
 

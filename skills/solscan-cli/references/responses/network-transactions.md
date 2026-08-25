@@ -6,7 +6,7 @@ This covers **daily network-wide transaction counts** — total, vote, and non-v
 
 ## `transactions`
 
-`solscan network transactions [--filter <all|total|vote|nonvote_success|nonvote_fail>] [--range <days>] [--from-time <YYYYMMDD>] [--to-time <YYYYMMDD>]`
+`solscan network transactions [--filter <all|total|vote|nonvote_success|nonvote_fail>] [--range <days>] [--from-date <YYYYMMDD>] [--to-date <YYYYMMDD>]`
 
 `data.series` is an array with one row per day. Its shape depends on `--filter`:
 

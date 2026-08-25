@@ -6,7 +6,7 @@ This covers **daily network-wide total active stake** — as opposed to one acco
 
 ## `stake`
 
-`solscan network stake [--range <days>] [--from-time <YYYYMMDD>] [--to-time <YYYYMMDD>]`
+`solscan network stake [--range <days>] [--from-date <YYYYMMDD>] [--to-date <YYYYMMDD>]`
 
 `data.series` is an array with one row per day; every row carries both a SOL and a USD figure for the same quantity.
 

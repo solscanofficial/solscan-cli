@@ -6,7 +6,7 @@ This covers **daily network-wide DEX/DeFi activity** — as opposed to one accou
 
 ## `defi-activity`
 
-`solscan network defi-activity [--range <days>] [--from-time <YYYYMMDD>] [--to-time <YYYYMMDD>]`
+`solscan network defi-activity [--range <days>] [--from-date <YYYYMMDD>] [--to-date <YYYYMMDD>]`
 
 `data.series` is an array with one row per day.
 

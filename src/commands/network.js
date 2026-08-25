@@ -4,16 +4,16 @@ import { printOutput } from '../formatter.js';
 function timeSeriesParams(opts) {
   const params = {};
   if (opts.range) params.range = parseInt(opts.range);
-  if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
-  if (opts.toTime) params.to_time = parseInt(opts.toTime);
+  if (opts.fromDate) params.from_date = parseInt(opts.fromDate);
+  if (opts.toDate) params.to_date = parseInt(opts.toDate);
   return params;
 }
 
 function addRangeOptions(cmd) {
   return cmd
-    .option('--range <days>', 'Time range in days, counting back from today: 30 | 90 | 180 | 365 (default 90). Overridden by --from-time/--to-time', '90')
-    .option('--from-time <YYYYMMDD>', 'Start date filter, e.g. 20240701. Pass together with --to-time')
-    .option('--to-time <YYYYMMDD>', 'End date filter, e.g. 20240715. Pass together with --from-time');
+    .option('--range <days>', 'Time range in days, counting back from today: 30 | 90 | 180 | 365 (default 90). Overridden by --from-date/--to-date', '90')
+    .option('--from-date <YYYYMMDD>', 'Start date filter, e.g. 20240701. Pass together with --to-date')
+    .option('--to-date <YYYYMMDD>', 'End date filter, e.g. 20240715. Pass together with --from-date');
 }
 
 export function registerNetworkCommand(program) {

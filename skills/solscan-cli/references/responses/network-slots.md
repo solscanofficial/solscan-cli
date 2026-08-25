@@ -6,7 +6,7 @@ This covers **daily block-production counts** network-wide — as opposed to a s
 
 ## `slots`
 
-`solscan network slots [--range <days>] [--from-time <YYYYMMDD>] [--to-time <YYYYMMDD>]`
+`solscan network slots [--range <days>] [--from-date <YYYYMMDD>] [--to-date <YYYYMMDD>]`
 
 `data.series` is an array with one row per day; each row carries a single count.
 

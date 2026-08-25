@@ -4,28 +4,28 @@
 solscan network <action> [options]
 ```
 
-Network-wide data across the whole Solana chain — not scoped to one account/token/program. Six of the seven actions return a **daily time series** (one row per day, `block_date`/`block_time`) over a window controlled by `--range` or `--from-time`/`--to-time`; `chain-info` is the exception — a single **live snapshot** with no time window at all (see below).
+Network-wide data across the whole Solana chain — not scoped to one account/token/program. Six of the seven actions return a **daily time series** (one row per day, `block_date`/`block_time`) over a window controlled by `--range` or `--from-date`/`--to-date`; `chain-info` is the exception — a single **live snapshot** with no time window at all (see below).
 
 **Host note**: these actions hit `public-api.solscan.io` instead of `pro-api.solscan.io/v2.0` (see [../../src/api.js](../../../src/api.js) `makeNetworkAnalyticsRequest`), but still require the same Solscan Pro API key via the `token` header — "public" in Solscan's docs describes the hostname, not that it's unauthenticated. A missing/invalid key still fails with `401`.
 
 | Action | Description | Required | Optional |
 |--------|-------------|----------|----------|
 | `chain-info` | Live chain snapshot: block height, epoch, absolute slot, total tx count | — | — |
-| `transactions` | Daily transaction counts (total/vote/non-vote success/fail) | — | `--filter`, `--range`, `--from-time`, `--to-time` |
-| `stake` | Daily total active stake, in SOL and USD | — | `--range`, `--from-time`, `--to-time` |
-| `fees` | Daily transaction fees (base + priority), in SOL and USD | — | `--range`, `--from-time`, `--to-time` |
-| `slots` | Daily count of blocks produced | — | `--range`, `--from-time`, `--to-time` |
-| `defi-activity` | Daily DEX activity: trades, traders, volume, active DEX count | — | `--range`, `--from-time`, `--to-time` |
-| `compute-units` | Daily compute units consumed by transactions | — | `--range`, `--from-time`, `--to-time` |
+| `transactions` | Daily transaction counts (total/vote/non-vote success/fail) | — | `--filter`, `--range`, `--from-date`, `--to-date` |
+| `stake` | Daily total active stake, in SOL and USD | — | `--range`, `--from-date`, `--to-date` |
+| `fees` | Daily transaction fees (base + priority), in SOL and USD | — | `--range`, `--from-date`, `--to-date` |
+| `slots` | Daily count of blocks produced | — | `--range`, `--from-date`, `--to-date` |
+| `defi-activity` | Daily DEX activity: trades, traders, volume, active DEX count | — | `--range`, `--from-date`, `--to-date` |
+| `compute-units` | Daily compute units consumed by transactions | — | `--range`, `--from-date`, `--to-date` |
 
 ## Shared time-window options
 
 Every `network` action except `chain-info` accepts the same three time-window flags:
 
 - **`--range <days>`** — `30 | 90 | 180 | 365` (default `90`). Counts back from today.
-- **`--from-time <YYYYMMDD>`** / **`--to-time <YYYYMMDD>`** — pass **both together** to pin an explicit start/end date, e.g. `--from-time 20240701 --to-time 20240715`. This is the `YYYYMMDD` integer format (e.g. `20260814`), **not** unix seconds — different convention from most other `--from-time`/`--to-time` flags in this CLI (see [../SKILL.md](../SKILL.md) Core Concepts), matching `token price-history` and `market volume` instead.
+- **`--from-date <YYYYMMDD>`** / **`--to-date <YYYYMMDD>`** — pass **both together** to pin an explicit start/end date, e.g. `--from-date 20240701 --to-date 20240715`. This is the `YYYYMMDD` integer format (e.g. `20260814`), **not** unix seconds — different convention from most other `--from-date`/`--to-date` flags in this CLI (see [../SKILL.md](../SKILL.md) Core Concepts), matching `token price-history` and `market volume` instead.
 
-**`--from-time`/`--to-time` take priority over `--range` when both are passed** — if you supply `--from-time`/`--to-time` alongside `--range`, the explicit date window wins and `--range` is silently ignored, matching the flag description in `--help`.
+**`--from-date`/`--to-date` take priority over `--range` when both are passed** — if you supply `--from-date`/`--to-date` alongside `--range`, the explicit date window wins and `--range` is silently ignored, matching the flag description in `--help`.
 
 ## Option details
 
