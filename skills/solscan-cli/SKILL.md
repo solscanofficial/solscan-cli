@@ -36,7 +36,7 @@ Each resource's full option tables, valid enum values, and worked examples live 
 | `block` | `last`, `detail`, `transactions` | [references/block.md](references/block.md) |
 | `market` | `list`, `info`, `volume`, `positions` | [references/market.md](references/market.md) |
 | `program` | `list`, `popular`, `analytics` | [references/program.md](references/program.md) |
-| `monitor` | `usage` — check your API key's Compute Unit usage, no options | — |
+| `monitor` | `usage` | [references/monitor.md](references/monitor.md) |
 
 ## Workflows
 
