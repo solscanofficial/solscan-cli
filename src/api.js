@@ -2,6 +2,9 @@ import axios from 'axios';
 import { resolveApiKey } from './config.js';
 
 const BASE_URL = 'https://pro-api.solscan.io/v2.0';
+// Network Analytics endpoints (src/commands/network.js) live on this host instead of
+// pro-api.solscan.io/v2.0, but still require the same Pro API key via the `token` header.
+const NETWORK_ANALYTICS_BASE_URL = 'https://public-api.solscan.io';
 
 const ERROR_MESSAGES = {
   400: 'Bad request — check your parameters (e.g. invalid address format, type, page_size,...)',
@@ -33,7 +36,7 @@ export async function makeRequest(endpoint, params, opts = {}) {
     process.exit(1);
   }
 
-  const url = `${BASE_URL}${endpoint}`;
+  const url = `${opts.baseUrl || BASE_URL}${endpoint}`;
 
   try {
     const response = await axios.get(url, {
@@ -50,8 +53,9 @@ export async function makeRequest(endpoint, params, opts = {}) {
       const msg = ERROR_MESSAGES[status] || `HTTP ${status}`;
       const body = err.response.data;
       console.error(`API Error (${status}): ${msg}`);
-      if (body && body.message) {
-        console.error(`Server message: ${body.message}`);
+      const serverMessage = body && (body.errors?.message || body.error_message || body.message);
+      if (serverMessage) {
+        console.error(`Server message: ${serverMessage}`);
       }
     } else if (err.request) {
       console.error('Network error: no response received from Solscan API.');
@@ -60,4 +64,12 @@ export async function makeRequest(endpoint, params, opts = {}) {
     }
     process.exit(1);
   }
+}
+
+/**
+ * Request against a Network Analytics endpoint (src/commands/network.js) — same
+ * Pro API key/header as makeRequest, but on the public-api.solscan.io host.
+ */
+export async function makeNetworkAnalyticsRequest(endpoint, params, opts = {}) {
+  return makeRequest(endpoint, params, { ...opts, baseUrl: NETWORK_ANALYTICS_BASE_URL });
 }

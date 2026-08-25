@@ -8,6 +8,7 @@ import { registerBlockCommand } from './commands/block.js';
 import { registerMarketCommand } from './commands/market.js';
 import { registerProgramCommand } from './commands/program.js';
 import { registerMonitorCommand } from './commands/monitor.js';
+import { registerNetworkCommand } from './commands/network.js';
 
 export function createProgram() {
   const program = new Command();
@@ -29,6 +30,7 @@ export function createProgram() {
   registerMarketCommand(program);
   registerProgramCommand(program);
   registerMonitorCommand(program);
+  registerNetworkCommand(program);
 
   return program;
 }

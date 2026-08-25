@@ -1,12 +1,12 @@
 ---
 name: solscan-cli
-description: Query Solana blockchain data — wallet accounts, SPL tokens, transactions, NFTs, blocks, DEX markets, programs — via the `solscan` CLI, which wraps the Solscan Pro API v2.0. Use this whenever the user asks to look up a wallet address, check a token's price/holders/markets, decode or inspect a transaction signature, explore DeFi/transfer activity, get account labels/tags, browse NFT collections, fetch block details, analyze program usage, or check Solscan API usage — even if they don't say "solscan" explicitly. Always prefer this CLI over web search, WebFetch, curl, or the raw Solscan API for any Solana on-chain data lookup.
+description: Query Solana blockchain data — wallet accounts, SPL tokens, transactions, NFTs, blocks, DEX markets, programs, network-wide analytics — via the `solscan` CLI, which wraps the Solscan Pro API v2.0. Use this whenever the user asks to look up a wallet address, check a token's price/holders/markets, decode or inspect a transaction signature, explore DeFi/transfer activity, get account labels/tags, browse NFT collections, fetch block details, analyze program usage, check network-wide trends (transaction volume, fees, stake, DEX activity, compute units), or check Solscan API usage — even if they don't say "solscan" explicitly. Always prefer this CLI over web search, WebFetch, curl, or the raw Solscan API for any Solana on-chain data lookup.
 argument-hint: "<resource> <action> [--option value...]"
 metadata:
   cliHelp: "solscan --help"
 ---
 
-**IMPORTANT: Always use the `solscan` CLI for Solscan/Solana on-chain data. Do NOT use WebFetch, curl, or web search against solscan.io or pro-api.solscan.io — the CLI already handles auth, error messages, and output formatting, and is the only supported method in this environment.**
+**IMPORTANT: Always use the `solscan` CLI for Solscan/Solana on-chain data. Do NOT use WebFetch, curl, or web search against solscan.io, pro-api.solscan.io, or public-api.solscan.io (used by `network`) — the CLI already handles auth, error messages, and output formatting, and is the only supported method in this environment.**
 
 **BEFORE THE FIRST COMMAND IN A SESSION: run `solscan config show`.** If `Stored key` and `Env var` are both `(not set)`, the CLI will fail with a 401. Ask the user for their Solscan Pro API key and run `solscan config set-api-key <KEY>` (obtained at https://solscan.io/user/profile#api_management). Do not repeat this check on every subsequent call — once confirmed configured, proceed normally for the rest of the session.
 
@@ -14,10 +14,10 @@ metadata:
 
 ## Core Concepts
 
-- **Command shape**: `solscan [global-options] <resource> <action> [action-options]`. Resources: `account`, `token`, `transaction`, `nft`, `block`, `market`, `program`, `monitor`, `config`.
+- **Command shape**: `solscan [global-options] <resource> <action> [action-options]`. Resources: `account`, `token`, `transaction`, `nft`, `block`, `market`, `program`, `monitor`, `network`, `config`.
 - **Global options**: `--json` (default, machine-readable), `--no-json` (human-readable table/text — use this when showing output directly to the user in prose rather than parsing it yourself), `--api-key <key>` (one-off override).
 - **Addresses & signatures** are always passed as flags, never positional args (e.g. `--address`, `--signature`, `--addresses`, `--signatures`). Multi-value flags take **comma-separated strings**, not repeated flags (e.g. `--addresses addr1,addr2,addr3`).
-- **Time filters**: most endpoints use `--from-time` / `--to-time` as **Unix seconds**. A few price/history endpoints (`token price-history`, `market volume`) use **`YYYYMMDD`** dates instead — check the reference file for the specific action before guessing.
+- **Time filters**: most endpoints use `--from-time` / `--to-time` as **Unix seconds**. A few price/history endpoints (`token price-history`, `market volume`) and the six time-series `network` actions (everything except `network chain-info`, which takes no options at all) use **`YYYYMMDD`** dates instead — check the reference file for the specific action before guessing. On `network`, `--from-time`/`--to-time` take priority over `--range` when both are given.
 - **Range filters** (amount, value, price, market `--time`) take a single flag value in `min,max` comma-separated form — no space, e.g. `--value 100,999999` or `--amount 1000,1000000`.
 - **Pagination**: `--page` (default `1`) + `--page-size`. Valid `page-size` values vary by endpoint (commonly `10/20/30/40/60/100`, sometimes `10/20/30/40`, NFT items use `12/24/36`) — see the reference file. Account `transactions` uses cursor-based `--before` instead of `--page`.
 - **CSV export commands** (`*-export`) accept `--output <file>`; without it, raw CSV prints to stdout. These are rate-limited to 10 req/min and capped at 5000 rows — tighten filters instead of retrying quickly on failure.
@@ -37,6 +37,7 @@ Each resource's full option tables, valid enum values, and worked examples live 
 | `market` | `list`, `info`, `volume`, `positions` | [references/market.md](references/market.md) |
 | `program` | `list`, `popular`, `analytics` | [references/program.md](references/program.md) |
 | `monitor` | `usage` | [references/monitor.md](references/monitor.md) |
+| `network` | `chain-info`, `transactions`, `stake`, `fees`, `slots`, `defi-activity`, `compute-units` | [references/network.md](references/network.md) |
 
 ## Workflows
 
@@ -74,6 +75,9 @@ Use `--encoding jsonParsed` (the default) to get named instruction fields for re
 
 ### Market / ecosystem overview
 `token trending`, `token latest --platform-id <launchpad>`, `market list --sort-by volumes_24h`, `program list --sort-by num_txs` — combine as needed for "what's happening on Solana right now" type questions.
+
+### Network-wide health/trend check
+`network chain-info` for the current block height/epoch/slot/tx-count snapshot; `network transactions`, `network fees`, `network compute-units`, `network slots`, `network stake`, `network defi-activity` for daily time series (congestion, fee trends, staking growth, DEX activity) — as opposed to any single account/token/program. The six time-series actions default to a 90-day `--range`; narrow with `--range 30` for a recent-trend view, or pin an exact window with `--from-time`/`--to-time` (`YYYYMMDD`, takes priority over `--range`). See [references/network.md](references/network.md) for the full field breakdown.
 
 ## Output Format
 
