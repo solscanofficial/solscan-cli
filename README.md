@@ -212,6 +212,22 @@ It's published inside the `solscan-cli` npm package, so any tool that discovers 
 echo "$(npm root -g)/solscan-cli/skills/solscan-cli/SKILL.md"
 ```
 
+### Installing with the `skills` CLI
+
+You can also install it with the [`skills` CLI](https://skills.sh/), which links `skills/solscan-cli` into your agent's skill directory:
+
+```bash
+# From a local clone of this repo
+git clone https://github.com/solscanofficial/solscan-cli.git
+cd solscan-cli
+npx skills add . --skill "solscan-cli"
+
+# Or directly from GitHub, without cloning first
+npx skills add solscanofficial/solscan-cli --skill "solscan-cli"
+```
+
+Add `-g` to either command to install the skill globally instead of per-project.
+
 If your AI agent tries to scrape solscan.io or call the Pro API directly instead of using this CLI, tell it: "Use the `solscan` CLI for all Solscan/Solana data lookups."
 
 ---
