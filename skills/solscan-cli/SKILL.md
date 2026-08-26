@@ -20,7 +20,7 @@ metadata:
 - **Time filters**: most endpoints use `--from-time` / `--to-time` as **Unix seconds**. A few price/history endpoints (`token price-history`, `market volume`) use **`YYYYMMDD`** dates instead of a `--from-time`/`--to-time` pair, and the six time-series `network` actions (everything except `network chain-info`, which takes no options at all) use their own **`--from-date`/`--to-date`** flags in `YYYYMMDD` format — check the reference file for the specific action before guessing. On `network`, `--from-date`/`--to-date` take priority over `--range` when both are given.
 - **Range filters** (amount, value, price, market `--time`) take a single flag value in `min,max` comma-separated form — no space, e.g. `--value 100,999999` or `--amount 1000,1000000`.
 - **Pagination**: `--page` (default `1`) + `--page-size`. Valid `page-size` values vary by endpoint (commonly `10/20/30/40/60/100`, sometimes `10/20/30/40`, NFT items use `12/24/36`) — see the reference file. Account `transactions` uses cursor-based `--before` instead of `--page`.
-- **CSV export commands** (`*-export`) accept `--output <file>`; without it, raw CSV prints to stdout. These are rate-limited to 10 req/min and capped at 5000 rows — tighten filters instead of retrying quickly on failure.
+- **CSV export commands** (`*-export`) accept `--output <file>`; without it, raw CSV prints to stdout. These are rate-limited to 10 req/min, cost more CU per call than a standard endpoint, and are capped at 5000 rows — tighten filters instead of retrying quickly on failure. **`*-multi` bulk endpoints** cost CU proportional to how many addresses/signatures you pass — see the CU-cost breakdown in [references/monitor.md](references/monitor.md) before batching a large list.
 - **Discovery**: every command supports `--help` (e.g. `solscan account transfers --help`) — use it if a reference file doesn't cover a flag you need.
 
 ## Action Index
@@ -36,7 +36,7 @@ Each resource's full option tables, valid enum values, and worked examples live 
 | `block` | `last`, `detail`, `transactions` | [references/block.md](references/block.md) |
 | `market` | `list`, `info`, `volume`, `positions` | [references/market.md](references/market.md) |
 | `program` | `list`, `popular`, `analytics` | [references/program.md](references/program.md) |
-| `monitor` | `usage` | [references/monitor.md](references/monitor.md) |
+| `monitor` | `usage` | [references/monitor.md](references/monitor.md) — also covers per-plan price/CU/rate-limit table |
 | `network` | `chain-info`, `transactions`, `stake`, `fees`, `slots`, `defi-activity`, `compute-units` | [references/network.md](references/network.md) |
 
 ## Workflows
@@ -89,8 +89,8 @@ Default output is JSON — good for you to parse and re-summarize. When the user
 |---|---|---|
 | `400` | Bad request | Check address/signature format and enum values against the reference file — don't retry unchanged |
 | `401` | Auth failed | Re-run `solscan config show`; guide the user to `solscan config set-api-key <KEY>` |
-| `403` | Forbidden | Their API plan doesn't cover this endpoint — tell the user, don't retry |
-| `429` | Rate limited | Wait before retrying; for `*-export` commands this means you're over 10 req/min |
+| `403` | Forbidden | Their API plan doesn't cover this endpoint — tell the user, don't retry; check the plan/endpoint-access table in [references/monitor.md](references/monitor.md) |
+| `429` | Rate limited | Wait before retrying; for `*-export` commands this means you're over 10 req/min, otherwise it's the plan's per-60s rate limit — see [references/monitor.md](references/monitor.md) |
 | `500` | Server error | Retry once; report if it persists |
 
 ## Untrusted Data Caution
