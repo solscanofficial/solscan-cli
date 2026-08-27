@@ -6,8 +6,8 @@ solscan token <action> [options]
 
 | Action | Description | Required | Optional |
 |--------|-------------|----------|----------|
-| `meta` | Name, symbol, decimals, supply | `--address` | — |
-| `meta-multi` | Batch metadata (max 50) | `--addresses` | — |
+| `meta` | Full token profile: identity, supply, authorities, creation provenance, live market snapshot (price/mcap/24h volume) | `--address` | — |
+| `meta-multi` | Same object as `meta`, batched — `data` is an array (max 50 addresses) | `--addresses` | — |
 | `price-latest` | Latest price of multiple tokens (max 50) | `--addresses` | — |
 | `price-history` | Historical price of multiple tokens (max 50) | `--addresses` | `--from-time`, `--to-time` (YYYYMMDD) |
 | `price` ⚠️ deprecated | Single token price history — use `price-history` | `--address` | `--from-time`, `--to-time` |
@@ -25,6 +25,8 @@ solscan token <action> [options]
 | `latest` | Newly listed tokens by launch platform | — | `--platform-id`, `--page`, `--page-size` |
 
 ## Option details
+
+**`meta` / `meta-multi`**: address input only — no pagination/sort/time flags. `meta` → `--address` (one mint); `meta-multi` → `--addresses` (comma-separated, **hard cap 50**, `400` if exceeded). `meta` returns `data` as an object; `meta-multi` returns `data` as an array with one entry **per resolvable address** — valid-but-unknown mints are dropped silently, so match by the `address` field, not list position. `meta-multi` CU cost scales per address. Response fields (identity, supply/authorities, creation provenance, `metadata` sub-object, `onchain_extensions`, deprecated `volume_24h` vs `total_dex_vol_24h`, error codes) → [responses/token-info.md](responses/token-info.md).
 
 **`holders`**: `--page-size` `10/20/30/40` · `--from-amount`/`--to-amount` are raw token amount strings · `--from-value`/`--to-value` are USD.
 
