@@ -2,7 +2,7 @@
 
 Field-by-field description of the JSON the `token price-latest`, `token price-history`, `token price`, and `token price-multi` commands return. Read this when you need to interpret or extract specific fields from a response, not when you're just building the command (see [../token.md](../token.md) for flags/params). Shared envelope/error shape: [token.md](token.md#common-envelope).
 
-This covers **spot and historical price** for one or more tokens — lighter-weight than [`meta`/`meta-multi`](token-info.md#meta--meta-multi), which also returns a price field alongside full token identity/supply data.
+This covers **spot and historical price** for one or more tokens — lighter-weight than [`meta`/`meta-multi`](token-info.md#meta--meta-multi), which also returns a price field alongside full token identity/supply data. For candlestick/OHLCV data (open/high/low/close/volume per interval) instead of a flat price series, see [token-price-ohlcv.md](token-price-ohlcv.md) (`price-ohlcv`).
 
 ## Contents
 

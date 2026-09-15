@@ -109,6 +109,31 @@ export function registerTokenCommand(program) {
     });
 
   token
+    .command('price-ohlcv')
+    .description('Get token price OHLCV (Open, High, Low, Close, Volume) candle data')
+    .requiredOption('--address <address>', 'A token address on solana blockchain')
+    .option('--from-time <timestamp>', 'Start time (unix seconds)')
+    .option('--to-time <timestamp>', 'End time (unix seconds)')
+    .option('--res <resolution>', 'Candle resolution: 1m|5m|15m|30m|1h|4h|8h|1d|1W|1M|1Y', '1m')
+    .option('--pool-id <address>', 'Pool address of the token to get data for a specific pool')
+    .option('--candles <number>', 'Number of candles returned', '600')
+    .option('--cursor <number>', 'Pagination cursor from a previous response to fetch the next page')
+    .option('--currency <currency>', 'Currency denomination: usd (default) or quote — quote only takes effect when combined with --pool-id')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      const params = { address: opts.address };
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
+      if (opts.res) params.res = opts.res;
+      if (opts.poolId) params.pool_id = opts.poolId;
+      if (opts.candles) params.candles = parseInt(opts.candles);
+      if (opts.cursor) params.cursor = parseInt(opts.cursor);
+      if (opts.currency) params.currency = opts.currency;
+      const data = await makeRequest('/token/price-ohlcv', params, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
+
+  token
     .command('markets')
     .description('Get token markets. Pass 1 token to search all markets; pass 2 tokens to search by pair')
     .requiredOption('--token <tokens>', 'Token address(es), comma-separated (1 or 2)')
