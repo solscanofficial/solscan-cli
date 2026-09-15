@@ -195,7 +195,7 @@ export function registerTokenCommand(program) {
   token
     .command('latest')
     .description('Get the list of recently created tokens')
-    .option('--platform-id <platform>', 'Filter by launch platform: jupiter | lifinity | meteora | orca | raydium | phoenix | sanctum | kamino | pumpfun | openbook | apepro | stabble | jupiterdca | jupiter_limit_order | solfi | zerofi | letsbonkfun_launchpad | raydium_launchlab | believe_launchpad | moonshot_launchpad | jup_studio_launchpad | bags_launchpad')
+    .option('--platform-id <platform>', 'Filter by launch platform: jupiter | lifinity | meteora | orca | raydium | phoenix | sanctum | kamino | pumpfun | openbook | apepro | stabble | jupiterdca | jupiter_limit_order | solfi | zerofi | letsbonkfun_launchpad | raydium_launchlab | believe_launchpad | moonshot_launchpad | jup_studio_launchpad | bags_launchpad | stonkfun_launchpad')
     .option('--page <number>', 'Page number', '1')
     .option('--page-size <number>', 'Items per page (10, 20, 30, 40, 60, 100)', '10')
     .action(async (opts, cmd) => {

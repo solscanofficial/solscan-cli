@@ -53,7 +53,7 @@ Transfer/DeFi `--activity-type` enums are the same lists as in [account.md](acco
 
 **`top`**: takes **no options at all** — no pagination, sorting, or limit flag; the API returns a fixed top-N list.
 
-**`latest`**: `--platform-id` one of `jupiter`, `lifinity`, `meteora`, `orca`, `raydium`, `phoenix`, `sanctum`, `kamino`, `pumpfun`, `openbook`, `apepro`, `stabble`, `jupiterdca`, `jupiter_limit_order`, `solfi`, `zerofi`, `letsbonkfun_launchpad`, `raydium_launchlab`, `believe_launchpad`, `moonshot_launchpad`, `jup_studio_launchpad`, `bags_launchpad`. `--page-size` `10/20/30/40/60/100`. Response rows are the `list`/`top` shape plus `platform`/`creator`, but `price_24h_change`/`holder` aren't guaranteed present (a freshly-created token may not have them tracked yet) — see [responses/token-list.md](responses/token-list.md#latest).
+**`latest`**: `--platform-id` one of `jupiter`, `lifinity`, `meteora`, `orca`, `raydium`, `phoenix`, `sanctum`, `kamino`, `pumpfun`, `openbook`, `apepro`, `stabble`, `jupiterdca`, `jupiter_limit_order`, `solfi`, `zerofi`, `letsbonkfun_launchpad`, `raydium_launchlab`, `believe_launchpad`, `moonshot_launchpad`, `jup_studio_launchpad`, `bags_launchpad`, `stonkfun_launchpad`. `--page-size` `10/20/30/40/60/100`. Response rows are the `list`/`top` shape plus `platform`/`creator`, but `price_24h_change`/`holder` aren't guaranteed present (a freshly-created token may not have them tracked yet) — see [responses/token-list.md](responses/token-list.md#latest).
 
 ## Response Fields
 
