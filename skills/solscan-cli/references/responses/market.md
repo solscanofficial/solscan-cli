@@ -10,6 +10,7 @@ This index only holds the envelope shared by every action. Field-level docs live
 | [market-info.md](market-info.md) | A single pool's token reserves and creation metadata | `info` |
 | [market-volume.md](market-volume.md) | A single pool's 24h volume/trade snapshot plus daily time series | `volume` |
 | [market-positions.md](market-positions.md) | CLMM-styles LP positions in a pool — price ranges and current value | `positions` |
+| [market-price-ohlcv.md](market-price-ohlcv.md) | A single pool's OHLCV candle data (open/high/low/close/volume per interval) | `price-ohlcv` |
 
 ## Common envelope
 

@@ -30,11 +30,11 @@ Each resource's full option tables, valid enum values, and worked examples live 
 | Resource | Common actions | Reference |
 |---|---|---|
 | `account` | `detail`, `metadata`, `metadata-multi`, `funded-by`, `portfolio`, `tokens`, `transactions`, `transactions-enhanced`, `transfers`, `transfer-total`, `transfer-export`, `defi`, `defi-export`, `balance-change`, `stake`, `stake-rewards`, `reward-export`, `leaderboard`, `data-decoded` | [references/account.md](references/account.md) |
-| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `holders`, `markets`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `top`, `latest` | [references/token.md](references/token.md) |
+| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `price-ohlcv`, `holders`, `markets`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `top`, `latest` | [references/token.md](references/token.md) |
 | `transaction` | `detail`, `detail-multi`, `actions`, `actions-multi`, `last`, `fees` | [references/transaction.md](references/transaction.md) |
 | `nft` | `news`, `activities`, `collections`, `items` | [references/nft.md](references/nft.md) |
 | `block` | `last`, `detail`, `transactions` | [references/block.md](references/block.md) |
-| `market` | `list`, `info`, `volume`, `positions` | [references/market.md](references/market.md) |
+| `market` | `list`, `info`, `volume`, `positions`, `price-ohlcv` | [references/market.md](references/market.md) |
 | `program` | `list`, `popular`, `analytics` | [references/program.md](references/program.md) |
 | `monitor` | `usage` | [references/monitor.md](references/monitor.md) — also covers per-plan price/CU/rate-limit table |
 | `network` | `chain-info`, `transactions`, `stake`, `fees`, `slots`, `defi-activity`, `compute-units` | [references/network.md](references/network.md) |

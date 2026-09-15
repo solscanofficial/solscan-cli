@@ -75,4 +75,27 @@ export function registerMarketCommand(program) {
       const data = await makeRequest('/market/positions', params, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });
+
+  market
+    .command('price-ohlcv')
+    .description('Get market pool price OHLCV (Open, High, Low, Close, Volume) candle data')
+    .requiredOption('--address <address>', 'Pool market address to fetch OHLCV data for')
+    .option('--from-time <timestamp>', 'Start time (unix seconds)')
+    .option('--to-time <timestamp>', 'End time (unix seconds)')
+    .option('--res <resolution>', 'Candle resolution: 1m|5m|15m|30m|1h|4h|8h|1d|1W|1M|1Y', '1m')
+    .option('--candles <number>', 'Number of candles returned (max 1000)', '600')
+    .option('--cursor <number>', 'Pagination cursor from a previous response to fetch the next page')
+    .option('--direction <direction>', 'Direction of calculation, by base or quote token on the pool', 'quote')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      const params = { address: opts.address };
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
+      if (opts.res) params.res = opts.res;
+      if (opts.candles) params.candles = parseInt(opts.candles);
+      if (opts.cursor) params.cursor = parseInt(opts.cursor);
+      if (opts.direction) params.direction = opts.direction;
+      const data = await makeRequest('/market/price-ohlcv', params, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
 }
