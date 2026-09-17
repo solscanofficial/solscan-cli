@@ -31,6 +31,8 @@ This covers **the most recent transactions network-wide** — a lightweight, unp
 | `program_ids` | array of string | Deduplicated list of every program address touched by the transaction — a superset view of the `program_id`s appearing in `parsed_instructions` (also includes programs invoked without a decodable instruction, e.g. via CPI). |
 | `time` | string | ISO 8601 timestamp of the slot (e.g. `"2024-08-09T09:01:24.000Z"`) — same instant as `block_time`, formatted for display rather than arithmetic. |
 
+Note: unlike [`block transactions`](block-transactions.md#transactions-item-fields) and [`account transactions`](account-activity.md#transactions), items here do **not** carry a `version` field — confirmed live on all three endpoints. Don't assume the item shapes are byte-for-byte identical.
+
 ## `parsed_instructions` item fields
 
 | Field | Type | Description |

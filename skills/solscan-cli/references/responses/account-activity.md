@@ -31,6 +31,7 @@ Each item in `data`:
 | `fee` | number | Transaction fee paid, in lamports. |
 | `status` | string | `Success` or `Fail`. A failed transaction still consumed the fee and landed on-chain — it's not the same as "never happened." |
 | `signer` | array of string | Address(es) that signed the transaction. Usually one entry, but multisig-style transactions can have several. |
+| `version` | number \| string | The transaction's version: `"legacy"`, `0`, or `1` — same field/values as [`block transactions`](block-transactions.md#transactions-item-fields) and [`transaction detail`](transaction-detail.md#top-level-data-fields). |
 | `block_time` | number | Unix timestamp (seconds) of the slot. |
 | `tx_hash` | string | The transaction signature — feed into `transaction detail`/`transaction actions` for full instruction-level detail, or into this command's own `--before` for pagination. |
 | `parsed_instructions` | array of object | Human-readable summary of each instruction in the transaction, in execution order. Each entry has `type` (instruction name, e.g. `"cancelAllAndPlaceOrders"`), `program` (program's known name, e.g. `"openbook_v2"`), and `program_id` (the program's address). |
@@ -48,6 +49,7 @@ Each item in `data`:
       "fee": 60601,
       "status": "Fail",
       "signer": ["ob2htHLoCu2P6tX7RrNVtiG1mYTas8NGJEVLaFEUngk"],
+      "version": "legacy",
       "block_time": 1723176170,
       "tx_hash": "2k5SKZo9tAgK3w24EozcCSm1doWLmqoFTe8UeSHd2pp7KJbsH4pRdM78hwfDsSTEC7edJtNYAEGryZe5L1uxU5DU",
       "parsed_instructions": [
@@ -72,6 +74,7 @@ Each item in `data`:
 - `parsed_instructions` is a summary, not the full instruction (no accounts/data/args) — pass `tx_hash` to `transaction detail` or `transaction actions` when you need arguments, account lists, or token/SOL amounts moved.
 - `program_ids` is a flat, deduplicated list — use it for a quick "did this transaction touch program X" check without walking `parsed_instructions`.
 - To paginate backward in time, set `--before` to the `tx_hash` of the **last** item in the current page (the oldest one, since results are newest-first), not the first.
+- `version` is present here but **not** on [`transaction last`](transaction-last.md#item-fields)'s items, despite the two otherwise sharing the same summary shape — confirmed live on both endpoints.
 
 ## `transactions-enhanced`
 

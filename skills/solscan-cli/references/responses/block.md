@@ -18,6 +18,7 @@ Every action wraps its payload the same way:
 |-------|------|--------------|
 | `success` | boolean | `true` on `200 OK`. |
 | `data` | object \| array | The actual payload, shaped per action (see the topic files above). |
+| `metadata` | object | Present on every successful `block *` response observed live (`detail`, `last`, `transactions`) — always an empty object `{}` in practice so far. Undocumented in Solscan's published reference; safe to ignore. Not present on error responses. |
 
 On failure (`400`/`401`/`429`/`500`), `success` is `false` and `data` is replaced by:
 
