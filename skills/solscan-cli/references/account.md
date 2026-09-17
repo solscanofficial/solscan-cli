@@ -11,6 +11,8 @@ solscan account <action> [options]
 | `metadata` | Label, icon, tags, domain, funder (deprecated field), active age | `--address` | — |
 | `metadata-multi` | Batch metadata (max 50) | `--addresses` | — |
 | `funded-by` | Funder accounts for multiple accounts (max 50) | `--addresses` | — |
+| `funding-activities` | Native-SOL funding activities performed BY an address (it acting as the funder) | `--address` | `--to`, `--exclude-to`, `--program`, `--amount`, `--value`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
+| `funding-activities-total` | Total funding-activities count for an address (no time-window default, no known cap) | `--address` | same filters as `funding-activities` minus pagination/sort |
 | `tokens` | Associated token/NFT accounts | `--address`, `--type` | `--page`, `--page-size`, `--hide-zero` |
 | `transactions` | Recent transactions, cursor-based pagination | `--address` | `--before`, `--limit` |
 | `transactions-enhanced` | Raw `getTransaction`-shaped objects with full server-side filtering | `--address` | `--cursor`, `--from-time`, `--to-time`, `--from-signature`, `--to-signature`, `--from-slot`, `--to-slot`, `--limit`, `--status`, `--program`, `--instruction`, `--token`, `--signer`, `--token-account`, `--encoding` |
@@ -68,9 +70,11 @@ ACTIVITY_BRIDGE_ORDER_IN ACTIVITY_BRIDGE_ORDER_OUT
 
 **`funded-by` response fields**: `address`, `funded_by`, `tx_hash`, `block_time`. `data` only includes rows Solscan could resolve — a queried address with no known funder is silently omitted, not returned as null. Full field-by-field detail: [responses/account-info.md](responses/account-info.md#funded-by).
 
+**`funding-activities` / `funding-activities-total`**: the inverse direction of `funded-by` — activities where `--address` is the **funder** (`from_address`), i.e. native-SOL transfers that created/funded other accounts, not an arbitrary transfer history. `--to`/`--exclude-to`/`--program` are comma-separated, max 5 · `--amount` (raw lamports) / `--value` (USD) accept either one value (`--amount 1000000`, lower-bound-only) or two comma-separated values (`--amount 1000000,2000000`, closed range) · `--sort-by` currently only supports `block_time` (default, `--sort-order` default `desc`) · `--page-size` `10/20/30/40/60/100` (default `10`). Unlike `transfer-total`, `funding-activities-total` has **no default time window** (an unfiltered call returns the lifetime count) and no documented hard cap — one live address returned `10,522,301`, above `transfer-total`'s documented 10M cap, so don't assume the same ceiling applies here. Full field-by-field detail, including an undocumented `metadata.tokens` map the official schema omits: [responses/account-activity.md](responses/account-activity.md#funding-activities).
+
 ## Response Fields
 
-Field-by-field description of each action's JSON response (types, meaning, edge cases), split by topic: [responses/account.md](responses/account.md) (index + shared envelope), [responses/account-info.md](responses/account-info.md) (`detail`/`data-decoded`/`tokens`/`metadata`/`metadata-multi`/`funded-by`), [responses/account-activity.md](responses/account-activity.md) (`transactions*`/`transfers*`/`defi`/`defi-export`/`balance-change`), [responses/account-holdings.md](responses/account-holdings.md) (`portfolio`/`stake`/`stake-rewards`/`reward-export`/`leaderboard`).
+Field-by-field description of each action's JSON response (types, meaning, edge cases), split by topic: [responses/account.md](responses/account.md) (index + shared envelope), [responses/account-info.md](responses/account-info.md) (`detail`/`data-decoded`/`tokens`/`metadata`/`metadata-multi`/`funded-by`), [responses/account-activity.md](responses/account-activity.md) (`transactions*`/`transfers*`/`defi`/`defi-export`/`balance-change`/`funding-activities`/`funding-activities-total`), [responses/account-holdings.md](responses/account-holdings.md) (`portfolio`/`stake`/`stake-rewards`/`reward-export`/`leaderboard`).
 
 ## Examples
 
@@ -101,4 +105,11 @@ solscan account transfer-export --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9z
 solscan account leaderboard --sort-by total_values --sort-order desc --page-size 20
 solscan account metadata-multi --addresses addr1,addr2,addr3
 solscan account funded-by --addresses addr1,addr2,addr3
+
+# Accounts this wallet funded (created via native SOL transfer), executed through a specific program
+solscan account funding-activities --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
+  --program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL
+
+# How many accounts has this wallet funded, lifetime?
+solscan account funding-activities-total --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
 ```

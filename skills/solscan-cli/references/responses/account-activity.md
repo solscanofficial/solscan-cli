@@ -14,6 +14,8 @@ These actions all return **time-ordered activity** for an address — transactio
 - [`defi`](#defi)
 - [`defi-export`](#defi-export)
 - [`balance-change`](#balance-change)
+- [`funding-activities`](#funding-activities)
+- [`funding-activities-total`](#funding-activities-total)
 
 > Only actions with a confirmed field-level source are documented here. If the action you need isn't listed yet, fall back to the `--no-json` output or `--help`, and treat unlabeled fields at face value rather than guessing their meaning.
 
@@ -442,3 +444,94 @@ Each item in `data`:
 - Unlike `transfers`, this is a **balance ledger**, not a counterparty ledger: there's no `from_address`/`to_address`/`flow`-partner here, just "this token account's balance moved by this much." Use `transfers` instead when the user wants to know who sent/received funds, and `balance-change` when they want a per-account balance history/audit trail (e.g. reconciling `pre_balance`/`post_balance` over time).
 - `--remove-spam` is worth defaulting to `on` for wallet-summary use cases — spam/dust tokens can otherwise dominate the page with near-zero `amount` rows.
 - `fee` is a property of the whole transaction, not of this specific balance change — don't sum `fee` across multiple rows from the same `trans_id` to estimate total fees paid, that double-counts.
+
+## `funding-activities`
+
+`solscan account funding-activities --address <ADDRESS> [filters...]`
+
+The inverse direction of [`funded-by`](account-info.md#funded-by): here `--address` is the **funder**, and each row is a native-SOL transfer that created/funded a *different* account. `data` is an **array**, ordered by `--sort-by` (default and currently only `block_time`) / `--sort-order` (default `desc`, newest first). No `total`/`has_next` metadata — page by incrementing `--page` until a response comes back with fewer than `--page-size` rows (or just call `funding-activities-total` up front).
+
+Each item in `data`:
+
+| Field | Type | Description |
+|-------|------|--------------|
+| `block_id` | number | Slot number the transfer's transaction landed in. |
+| `trans_id` | string | Transaction signature — feed into `transaction detail`/`transaction actions` for the full transaction. |
+| `block_time` | number | Unix timestamp (seconds) of the slot. |
+| `time` | string | Same instant as `block_time`, as an ISO-8601 string. |
+| `from_address` | string | The funder — normally identical to the queried `--address` on every row (this endpoint doesn't surface activity where `--address` was the *funded* party). |
+| `to_address` | string | The account that was created/funded by this transfer. |
+| `token_address` | string | Always the native-SOL placeholder mint, confirmed live: `So11111111111111111111111111111111111111111` (44 characters, all `1`s). **This is not the same address as the wrapped-SOL mint** `So11111111111111111111111111111111111111112` (ends in `2`) — the two differ only in their last character. This endpoint is native-SOL-only, so `token_address` never varies. |
+| `token_decimals` | number | Always `9` (SOL's decimals), confirmed live. |
+| `amount` | number | Raw lamports transferred — divide by `10^9` for SOL. |
+| `value` | number | USD value of `amount` at the time of the transfer. |
+| `program` | array of string | Program address(es) that executed the funding transfer. Confirmed live to be either the System Program (`11111111111111111111111111111111`, a plain SOL transfer/account creation) or another program that triggers an account-funding transfer as a side effect — e.g. `ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL` (Associated Token Program) when the "funding" was really the rent-exempt lamports paid to create an ATA. Don't assume every row is a direct wallet-to-wallet SOL transfer — check `program` before describing the activity as "sent SOL to." |
+
+**Example** (live, addresses/signature redacted-equivalent to a real captured response)
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "block_id": 429367789,
+      "trans_id": "4VMgj4jZfghtEt79YxUnMNjzajiGFM56txgeXA91gUYpL6GgagbjBqpEji9aZfXxJaSbxrBc2YaYhJtr4gYbAqve",
+      "block_time": 1782615996,
+      "time": "2026-06-28T03:06:36.000Z",
+      "from_address": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "to_address": "FrcWtJN13inFK8bbKZUSq8ZpTSycUoQPMZgyYHh8NoXX",
+      "token_address": "So11111111111111111111111111111111111111111",
+      "token_decimals": 9,
+      "amount": 2039280,
+      "value": 0.14468977942527655,
+      "program": ["ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"]
+    }
+  ],
+  "metadata": {
+    "tokens": {
+      "FrcWtJN13inFK8bbKZUSq8ZpTSycUoQPMZgyYHh8NoXX": {},
+      "So11111111111111111111111111111111111111111": {
+        "token_address": "So11111111111111111111111111111111111111111",
+        "token_name": "SOL",
+        "token_symbol": "SOL",
+        "token_icon": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png"
+      }
+    }
+  }
+}
+```
+
+**Interpretation tips**
+
+- Always divide `amount` by `10^9` before displaying — the example row is `0.00203928` SOL, not ~2 million.
+- `program` is a real signal, not decoration — a row with `program: ["ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"]` is rent paid to open an associated token account for `to_address`, not a discretionary SOL gift; a row with the System Program address is a plain transfer/account-creation.
+- This endpoint only reports the **funder** direction. To find who funded `--address` itself (the reverse question), use [`funded-by`](account-info.md#funded-by) instead — the two are not the same call with addresses swapped, they're genuinely different endpoints/filters.
+- No total/has_next metadata on the list endpoint — call `funding-activities-total` (same filters) first to decide whether paging through `funding-activities` or narrowing filters makes more sense.
+- You can use `metadata.tokens[row.token_address]` to get the SOL icon/label for display, but don't expect `metadata.tokens[row.to_address]` to ever be populated — it's reliably `{}`.
+
+## `funding-activities-total`
+
+`solscan account funding-activities-total --address <ADDRESS> [filters...]`
+
+Like `transfer-total`, `data` here is a **bare number** — the total count of funding activities matching the given filters, not a list.
+
+| Field | Type | Description |
+|-------|------|--------------|
+| `data` | number | Total count of funding activities matching the filters. |
+
+**Example** (live)
+
+```json
+{
+  "success": true,
+  "data": 42,
+  "metadata": {}
+}
+```
+
+**Interpretation tips**
+
+- Same filter set as [`funding-activities`](#funding-activities) (`--to`, `--exclude-to`, `--program`, `--amount`, `--value`, `--from-time`/`--to-time`) minus pagination/sort.
+- Unlike `transfer-total`, this endpoint has **no default time window** — an unfiltered call returns the address's lifetime funding count, not a recent-weeks slice. Confirmed live: a high-volume address returned `10,522,301` with no time filter applied, and the earliest row returned by the paginated `funding-activities` endpoint for a different address (sorted `asc`) dated back to 2021 — so absence of `--from-time`/`--to-time` really does mean "since genesis," not "last N days."
+- Also unlike `transfer-total` (documented hard cap at 10,000,000), no cap was observed here: the `10,522,301` result above already exceeds that number, so don't assume the same 10M ceiling applies to this endpoint — treat a very large result as a real count unless you have specific evidence otherwise.
+- `metadata` is `{}` here (unlike the list endpoint) — there's no `tokens` map to build, since there's no `data` array of rows to key it from.

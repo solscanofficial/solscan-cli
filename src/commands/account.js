@@ -495,4 +495,80 @@ export function registerAccountCommand(program) {
       const data = await makeRequest('/account/transfer/total', params, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });
+
+  account
+    .command('funding-activities')
+    .description('Get the list of funding activities performed by an address (native SOL transfers that created/funded other accounts)')
+    .requiredOption('--address <address>', 'Solana wallet address of the funder')
+    .option('--to <addresses>', 'Funded destination addresses, comma-separated (max 5)')
+    .option('--exclude-to <addresses>', 'Exclude funded destination addresses, comma-separated (max 5)')
+    .option('--program <addresses>', 'Program addresses that executed the funding activity, comma-separated (max 5)')
+    .option('--amount <min>,<max>', 'Filter by amount range, raw lamports (e.g. 1,100)')
+    .option('--value <min>,<max>', 'Filter by USD value range (e.g. 1,1000)')
+    .option('--from-time <timestamp>', 'Start time (unix seconds)')
+    .option('--to-time <timestamp>', 'End time (unix seconds)')
+    .option('--page <number>', 'Page number', '1')
+    .option('--page-size <number>', 'Items per page (10, 20, 30, 40, 60, 100)', '10')
+    .option('--sort-by <field>', 'Sort field: block_time', 'block_time')
+    .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      const params = {
+        address: opts.address,
+        page: parseInt(opts.page),
+        page_size: parseInt(opts.pageSize),
+        sort_by: opts.sortBy,
+        sort_order: opts.sortOrder,
+      };
+
+      if (opts.to) params.to = opts.to.split(',');
+      if (opts.excludeTo) params.exclude_to = opts.excludeTo.split(',');
+      if (opts.program) params.program = opts.program.split(',');
+      if (opts.amount) {
+        const [min, max] = opts.amount.split(',');
+        params.amount = max !== undefined ? [parseFloat(min), parseFloat(max)] : [parseFloat(min)];
+      }
+      if (opts.value) {
+        const [min, max] = opts.value.split(',');
+        params.value = max !== undefined ? [parseFloat(min), parseFloat(max)] : [parseFloat(min)];
+      }
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
+
+      const data = await makeRequest('/account/funding/activities', params, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
+
+  account
+    .command('funding-activities-total')
+    .description('Get the total funding activities count of an address')
+    .requiredOption('--address <address>', 'Solana wallet address of the funder')
+    .option('--to <addresses>', 'Funded destination addresses, comma-separated (max 5)')
+    .option('--exclude-to <addresses>', 'Exclude funded destination addresses, comma-separated (max 5)')
+    .option('--program <addresses>', 'Program addresses that executed the funding activity, comma-separated (max 5)')
+    .option('--amount <min>,<max>', 'Filter by amount range, raw lamports (e.g. 1,100)')
+    .option('--value <min>,<max>', 'Filter by USD value range (e.g. 1,1000)')
+    .option('--from-time <timestamp>', 'Start time (unix seconds)')
+    .option('--to-time <timestamp>', 'End time (unix seconds)')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      const params = { address: opts.address };
+
+      if (opts.to) params.to = opts.to.split(',');
+      if (opts.excludeTo) params.exclude_to = opts.excludeTo.split(',');
+      if (opts.program) params.program = opts.program.split(',');
+      if (opts.amount) {
+        const [min, max] = opts.amount.split(',');
+        params.amount = max !== undefined ? [parseFloat(min), parseFloat(max)] : [parseFloat(min)];
+      }
+      if (opts.value) {
+        const [min, max] = opts.value.split(',');
+        params.value = max !== undefined ? [parseFloat(min), parseFloat(max)] : [parseFloat(min)];
+      }
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
+
+      const data = await makeRequest('/account/funding/activities/total', params, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
 }

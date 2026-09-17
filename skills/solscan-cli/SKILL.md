@@ -29,7 +29,7 @@ Each resource's full option tables, valid enum values, and worked examples live 
 
 | Resource | Common actions | Reference |
 |---|---|---|
-| `account` | `detail`, `metadata`, `metadata-multi`, `funded-by`, `portfolio`, `tokens`, `transactions`, `transactions-enhanced`, `transfers`, `transfer-total`, `transfer-export`, `defi`, `defi-export`, `balance-change`, `stake`, `stake-rewards`, `reward-export`, `leaderboard`, `data-decoded` | [references/account.md](references/account.md) |
+| `account` | `detail`, `metadata`, `metadata-multi`, `funded-by`, `funding-activities`, `funding-activities-total`, `portfolio`, `tokens`, `transactions`, `transactions-enhanced`, `transfers`, `transfer-total`, `transfer-export`, `defi`, `defi-export`, `balance-change`, `stake`, `stake-rewards`, `reward-export`, `leaderboard`, `data-decoded` | [references/account.md](references/account.md) |
 | `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `price-ohlcv`, `holders`, `markets`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `top`, `latest` | [references/token.md](references/token.md) |
 | `transaction` | `detail`, `detail-multi`, `actions`, `actions-multi`, `last`, `fees` | [references/transaction.md](references/transaction.md) |
 | `nft` | `news`, `activities`, `collections`, `items` | [references/nft.md](references/nft.md) |
