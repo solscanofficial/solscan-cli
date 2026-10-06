@@ -1,6 +1,6 @@
 # Solscan CLI
 
-Command-line tool for querying Solana blockchain data via the [Solscan Pro API v2.0](https://pro-api.solscan.io/pro-api-docs/v2.0) — accounts, tokens, transactions, NFTs, blocks, markets, programs, and API monitoring. 59+ actions, JSON and human-readable output.
+Command-line tool for querying Solana blockchain data via the [Solscan Pro API v2.0](https://pro-api.solscan.io/pro-api-docs/v2.0) — accounts, tokens, transactions, NFTs, blocks, markets, programs, network-wide analytics, and API monitoring. 70+ actions, JSON and human-readable output.
 
 Ships with a bundled [Agent Skill](#agent-skills) so AI coding assistants (Claude Code and others) query Solana data through this CLI instead of scraping solscan.io or guessing at the API.
 
@@ -105,14 +105,15 @@ Every action's full option table, default values, valid enums, and pagination ru
 
 | Resource | Actions | Full reference |
 |----------|---------|-----------------|
-| `account` | `detail`, `data-decoded`, `metadata`, `metadata-multi`, `funded-by`, `tokens`, `transactions`, `transactions-enhanced`, `transfers`, `transfer-total`, `transfer-export`, `defi`, `defi-export`, `balance-change`, `portfolio`, `stake`, `stake-rewards`, `reward-export`, `leaderboard` | [references/account.md](skills/solscan-cli/references/account.md) |
-| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `holders`, `markets`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `top`, `latest` | [references/token.md](skills/solscan-cli/references/token.md) |
+| `account` | `detail`, `data-decoded`, `metadata`, `metadata-multi`, `funded-by`, `funding-activities`, `funding-activities-total`, `tokens`, `transactions`, `transactions-enhanced`, `transfers`, `transfer-total`, `transfer-export`, `defi`, `defi-export`, `balance-change`, `portfolio`, `stake`, `stake-rewards`, `reward-export`, `leaderboard` | [references/account.md](skills/solscan-cli/references/account.md) |
+| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `price-ohlcv`, `holders`, `markets`, `statistic`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `list-v2`, `top`, `latest` | [references/token.md](skills/solscan-cli/references/token.md) |
 | `transaction` | `detail`, `detail-multi`, `actions`, `actions-multi`, `last`, `fees` | [references/transaction.md](skills/solscan-cli/references/transaction.md) |
 | `nft` | `news`, `activities`, `collections`, `items` | [references/nft.md](skills/solscan-cli/references/nft.md) |
 | `block` | `last`, `detail`, `transactions` | [references/block.md](skills/solscan-cli/references/block.md) |
-| `market` | `list`, `info`, `volume`, `positions` | [references/market.md](skills/solscan-cli/references/market.md) |
+| `market` | `list`, `info`, `volume`, `positions`, `price-ohlcv` | [references/market.md](skills/solscan-cli/references/market.md) |
 | `program` | `list`, `popular`, `analytics` | [references/program.md](skills/solscan-cli/references/program.md) |
-| `monitor` | `usage` | — (no options) |
+| `monitor` | `usage` | [references/monitor.md](skills/solscan-cli/references/monitor.md) |
+| `network` | `chain-info`, `transactions`, `stake`, `fees`, `slots`, `defi-activity`, `compute-units` | [references/network.md](skills/solscan-cli/references/network.md) |
 
 **Pagination**: most list endpoints take `--page` (default `1`) and `--page-size` (default `10`; valid values vary by endpoint — `10/20/30/40/60/100` is most common). `account transactions` uses cursor-based `--before` instead. Some actions use `--limit` in place of page/page-size. See the reference file for exact valid values per action.
 
@@ -131,10 +132,11 @@ solscan account portfolio --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
 solscan account transfers --address 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM \
   --flow in --token EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 
-# Token: identity, price, holders
+# Token: identity, price, holders, trading stats
 solscan token meta --address So11111111111111111111111111111111111111112
 solscan token price-latest --addresses So11111111111111111111111111111111111111112,EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 solscan token holders --address EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v --from-value 10000 --to-value 100000
+solscan token statistic --address DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263
 
 # Token: discovery
 solscan token trending --limit 20 --no-json
@@ -153,9 +155,14 @@ solscan nft activities --collection DRiP2Pn2K6fuMLKQmt5rZWyHiUZ6WK3GChEySUpHSS4x
 solscan block last --limit 20
 solscan block transactions --block 250000000 --exclude-vote --page-size 40
 
-# Market: top pools, program analytics
+# Market: top pools, pool OHLCV candles (--address is a pool, not a token mint), program analytics
 solscan market list --sort-by volumes_24h --sort-order desc
+solscan market price-ohlcv --address 8FnX3xo2yYw3EUE6w3nQA4GfXGS9wpK6oj3veJpbFzLo --res 1h --candles 100
 solscan program analytics --address TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA --range 7
+
+# Network-wide snapshot and daily trend
+solscan network chain-info
+solscan network transactions --range 30
 
 # Monitor your own API usage
 solscan monitor usage
@@ -169,7 +176,7 @@ More examples — including CSV export (`*-export --output file.csv`), activity-
 
 **Wallet research**: `account metadata` (known label?) → `account portfolio` (holdings) → `account transfers` (recent movement) → `account defi` (swap history)
 
-**Token analysis**: `token meta` (confirm identity) → `token price-latest` → `token holders` (concentration) → `token markets` (liquidity) → `token historical`
+**Token analysis**: `token meta` (confirm identity) → `token price-latest` → `token holders` (concentration) → `token statistic` (volume/traders/price change, holder & trader concentration) → `token markets` (liquidity) → `token historical`
 
 **Transaction inspection**: `transaction actions` for a decoded human-readable summary, or `transaction detail` for raw balance-change/IDL data
 
@@ -244,7 +251,7 @@ solscan-cli/
 │   ├── config.js               # API key management (flag > env > stored)
 │   ├── api.js                  # Axios HTTP client & error handling
 │   ├── formatter.js            # JSON / human-readable output formatter
-│   └── commands/                # account, token, transaction, nft, block, market, program, monitor
+│   └── commands/                # account, token, transaction, nft, block, market, program, monitor, network
 ├── skills/
 │   └── solscan-cli/
 │       ├── SKILL.md              # Agent-facing usage guide

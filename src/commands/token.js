@@ -270,6 +270,16 @@ Examples:
     });
 
   token
+    .command('statistic')
+    .description('Get trading statistics (volume/trades/traders/price change per 1m-30d window), market data and holder/trader concentration metrics for one token')
+    .requiredOption('--address <address>', 'A token address on solana blockchain')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      const data = await makeRequest('/token/statistic', { address: opts.address }, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
+
+  token
     .command('top')
     .description('Get the list of top tokens')
     .action(async (_opts, cmd) => {

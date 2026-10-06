@@ -18,6 +18,7 @@ solscan token <action> [options]
 | `transfers` | Transfer history for a token | `--address` | `--activity-type`, `--from`, `--exclude-from`, `--to`, `--exclude-to`, `--amount`, `--value`, `--from-time`, `--to-time`, `--exclude-amount-zero`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 | `defi` | DeFi activity involving a token | `--address` | `--activity-type`, `--from`, `--source`, `--token`, `--value`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 | `defi-export` | DeFi activity CSV (max 5000 rows, 10 req/min) | `--address` | `--activity-type`, `--from`, `--platform`, `--source`, `--token`, `--from-time`, `--to-time`, `--sort-by`, `--sort-order`, `--output` |
+| `statistic` | One token's trading stats (volume/trades/traders/buyers/sellers + price change % per 1m–30d window), market cap/liquidity/supply, holder & trader concentration | `--address` | — |
 | `historical` | Daily historical supply/holder-count/transfer-count/trade-volume time series | `--address` | `--range` (`7`\|`30`, default `7`) |
 | `search` | Search by keyword/address/name/symbol | `--keyword` | `--search-mode`, `--search-by`, `--exclude-unverified`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 | `trending` | Currently trending tokens | — | `--limit` |
@@ -36,13 +37,15 @@ solscan token <action> [options]
 
 **`price-history`**: `--from-time`/`--to-time` are **`YYYYMMDD`**, not unix timestamps.
 
-**`price-ohlcv`**: single `--address` only (no batch form) · `--from-time`/`--to-time` are **unix seconds**, unlike `price-history`'s `YYYYMMDD` · `--res` one of `1m`\|`5m`\|`15m`\|`30m`\|`1h`\|`4h`\|`8h`\|`1d`\|`1W`\|`1M`\|`1Y` (default `1m`) · `--candles` `1`-`1000` (default `600`) · `--pool-id` scopes to one DEX pool instead of the token's aggregated price · `--cursor` walks **backward in time** (paginates to older candles, not newer) · `--currency` `usd`(default)\|`quote` — `quote` only takes effect **when combined with `--pool-id`**, and only re-denominates the four price fields (`open`/`high`/`low`/`close_price`) into that pool's quote token; **`volume` is always USD regardless of `--currency`**. `--currency quote` without `--pool-id` is accepted but silently behaves like `usd` since there's no quote token to convert to, see [responses/token-price-ohlcv.md](responses/token-price-ohlcv.md#currency-quote-denomination). Data only available from 2026-01-01 onward.
+**`price-ohlcv`**: single `--address` only (no batch form) · `--from-time`/`--to-time` are **unix seconds**, unlike `price-history`'s `YYYYMMDD` · `--res` one of `1m`\|`5m`\|`15m`\|`30m`\|`1h`\|`4h`\|`8h`\|`1d`\|`1W`\|`1M`\|`1Y` (default `1m`) · `--candles` `1`-`1000` (default `600`) · `--pool-id` scopes to one DEX pool instead of the token's aggregated price · `--cursor` walks **backward in time** (paginates to older candles, not newer) · `--currency` `usd`(default)\|`quote` — `quote` only takes effect **when combined with `--pool-id`**, and only re-denominates the four price fields (`open`/`high`/`low`/`close_price`) into that pool's quote token; **`volume` is always USD regardless of `--currency`**. `--currency quote` without `--pool-id` is accepted but silently behaves like `usd` since there's no quote token to convert to, see [responses/token-price-ohlcv.md](responses/token-price-ohlcv.md#currency--quote-denomination). Data only available from 2026-01-01 onward.
 
 **`transfers`**: comma-separated `--from`/`--exclude-from`/`--to`/`--exclude-to` max 5 · `--amount`/`--value` are single flags in `min,max` comma-separated form · `--sort-by` `block_time` · `--page-size` `10/20/30/40/60/100`.
 
 **`defi` / `defi-export`**: `--source` comma-separated max 5 · `--value <min>,<max>` comma-separated USD range · `defi-export` adds `--platform` (comma-separated max 5), drops pagination.
 
 Transfer/DeFi `--activity-type` enums are the same lists as in [account.md](account.md) (`ACTIVITY_SPL_*` for transfers, `ACTIVITY_TOKEN_*`/`ACTIVITY_*` for DeFi).
+
+**`statistic`**: `--address` only (one mint, no batch form). Returns **the same 193-key metrics object as one `list-v2` row**, just looked up by address — so use it for "how is token X trading" questions and `list-v2` for "which tokens…" questions. Like `list-v2`, it has no name/symbol/absolute price (pair with `meta` / `price-latest`). An address that isn't a tracked token (a wallet, or a mint created minutes ago that hasn't been indexed yet) returns **`200` with `data: {}`**, not an error — treat an empty object as "no stats available", not as zeros. A malformed address → `400`. Field meanings and quirks (e.g. SOL's `market_cap` reflects wrapped-SOL supply only) → [responses/token-statistic.md](responses/token-statistic.md).
 
 **`historical`**: `--range` `7`\|`30` days only — no other flags. Returns a daily time series, not a live snapshot — no `price` field here (unlike `meta`/`price-latest`); see [responses/token-historical.md](responses/token-historical.md).
 
@@ -67,7 +70,7 @@ Transfer/DeFi `--activity-type` enums are the same lists as in [account.md](acco
 
 ## Response Fields
 
-Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`, `price`, `price-multi`) / [responses/token-price-ohlcv.md](responses/token-price-ohlcv.md) (`price-ohlcv`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`, `trending`, `latest`) / [responses/token-list-v2.md](responses/token-list-v2.md) (`list-v2`) / [responses/token-historical.md](responses/token-historical.md) (`historical`) / [responses/token-search.md](responses/token-search.md) (`search`).
+Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`, `price`, `price-multi`) / [responses/token-price-ohlcv.md](responses/token-price-ohlcv.md) (`price-ohlcv`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`, `trending`, `latest`) / [responses/token-list-v2.md](responses/token-list-v2.md) (`list-v2`) / [responses/token-statistic.md](responses/token-statistic.md) (`statistic`) / [responses/token-historical.md](responses/token-historical.md) (`historical`) / [responses/token-search.md](responses/token-search.md) (`search`).
 
 ## Examples
 
@@ -102,6 +105,10 @@ solscan token list-v2 --sort-by first_listing_time --filter holder_top_1_balance
 
 # Small caps ($1M-$5M market cap) with >= $50k liquidity, by 24h volume
 solscan token list-v2 --sort-by volume_24h --filter market_cap=1000000,5000000 --filter liquidity=50000, --page-size 40
+
+# One token's trading/holder stats (volume, buy/sell split, traders, price change per window, concentration)
+solscan token statistic --address DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263
+
 solscan token historical --address So11111111111111111111111111111111111111112 --range 30
 
 # Fuzzy name search

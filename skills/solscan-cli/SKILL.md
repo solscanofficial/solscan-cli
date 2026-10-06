@@ -1,6 +1,6 @@
 ---
 name: solscan-cli
-description: Query Solana blockchain data — wallet accounts, SPL tokens, transactions, NFTs, blocks, DEX markets, programs, network-wide analytics — via the `solscan` CLI, which wraps the Solscan Pro API v2.0. Use this whenever the user asks to look up a wallet address, check a token's price/holders/markets, screen or rank tokens (top gainers, highest volume, new launches, holder concentration), decode or inspect a transaction signature, explore DeFi/transfer activity, get account labels/tags, browse NFT collections, fetch block details, analyze program usage, check network-wide trends (transaction volume, fees, stake, DEX activity, compute units), or check Solscan API usage — even if they don't say "solscan" explicitly. Always prefer this CLI over web search, WebFetch, curl, or the raw Solscan API for any Solana on-chain data lookup.
+description: Query Solana blockchain data — wallet accounts, SPL tokens, transactions, NFTs, blocks, DEX markets, programs, network-wide analytics — via the `solscan` CLI, which wraps the Solscan Pro API v2.0. Use this whenever the user asks to look up a wallet address, check a token's price/holders/markets/trading stats (volume, buy/sell pressure, trader count, price change, holder concentration), screen or rank tokens (top gainers, highest volume, new launches, holder concentration), decode or inspect a transaction signature, explore DeFi/transfer activity, get account labels/tags, browse NFT collections, fetch block details, analyze program usage, check network-wide trends (transaction volume, fees, stake, DEX activity, compute units), or check Solscan API usage — even if they don't say "solscan" explicitly. Always prefer this CLI over web search, WebFetch, curl, or the raw Solscan API for any Solana on-chain data lookup.
 argument-hint: "<resource> <action> [--option value...]"
 metadata:
   cliHelp: "solscan --help"
@@ -30,7 +30,7 @@ Each resource's full option tables, valid enum values, and worked examples live 
 | Resource | Common actions | Reference |
 |---|---|---|
 | `account` | `detail`, `metadata`, `metadata-multi`, `funded-by`, `funding-activities`, `funding-activities-total`, `portfolio`, `tokens`, `transactions`, `transactions-enhanced`, `transfers`, `transfer-total`, `transfer-export`, `defi`, `defi-export`, `balance-change`, `stake`, `stake-rewards`, `reward-export`, `leaderboard`, `data-decoded` | [references/account.md](references/account.md) |
-| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `price-ohlcv`, `holders`, `markets`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `list-v2`, `top`, `latest` | [references/token.md](references/token.md) |
+| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `price-ohlcv`, `holders`, `markets`, `statistic`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `list-v2`, `top`, `latest` | [references/token.md](references/token.md) |
 | `transaction` | `detail`, `detail-multi`, `actions`, `actions-multi`, `last`, `fees` | [references/transaction.md](references/transaction.md) |
 | `nft` | `news`, `activities`, `collections`, `items` | [references/nft.md](references/nft.md) |
 | `block` | `last`, `detail`, `transactions` | [references/block.md](references/block.md) |
@@ -51,9 +51,10 @@ Each resource's full option tables, valid enum values, and worked examples live 
 ### Token analysis
 1. `token meta --address <MINT>` → confirm identity (name/symbol/decimals/supply) before anything else — mints can be spoofed with similar names
 2. `token price-latest --addresses <MINT>` → current price
-3. `token holders --address <MINT> --page-size 20` → concentration risk (use `--from-value`/`--to-value` to bucket by USD)
-4. `token markets --token <MINT> --sort-by tvl` → liquidity venues
-5. `token historical --address <MINT> --range 30` → trend context
+3. `token statistic --address <MINT>` → one call for trading activity (volume, buy vs sell, trades, unique traders/buyers/sellers, price change % per 1m–30d window), market cap/liquidity/holder count, and concentration scores (top-N holder %, trader HHI, top-N trader volume %). `data: {}` means the token isn't tracked yet, so fall back to the steps below.
+4. `token holders --address <MINT> --page-size 20` → who the top holders actually are (pools/CEX/burn wallets inflate the concentration %s from step 3)
+5. `token markets --token <MINT> --sort-by tvl` → liquidity venues
+6. `token historical --address <MINT> --range 30` → daily trend context
 
 ### Transaction inspection
 - `transaction detail --signature <SIG>` for the raw balance-change/IDL view, or `transaction actions --signature <SIG>` for a human-readable decoded summary (swaps, transfers, NFT activity). Use `actions` first when the user just wants "what happened" — it's already interpreted.
@@ -76,7 +77,7 @@ Use `--encoding jsonParsed` (the default) to get named instruction fields for re
 ### Token screening (find tokens matching criteria)
 Use `token list-v2` whenever the user wants tokens ranked or filtered by trading activity — "top gainers in the last hour", "pump.fun tokens with >$100k volume", "new tokens where no single holder owns >20%". It sorts and filters server-side on ~190 metrics (volume/trades/traders/buyers/sellers per 1m–30d window, price change %, holder concentration, listing time), so prefer it over paging `token list` and filtering yourself.
 1. `token list-v2 --sort-by price_1h_change_pct --filter volume_24h=100000, --platform pumpfun --page-size 20` → rows of metrics keyed by `token_address`. Range filters on any metric (incl. `market_cap`, `liquidity`, `num_holder`) combine freely and can take both bounds.
-2. Rows carry **no name/symbol/price** — resolve the addresses you'll show with `token meta-multi --addresses a,b,...` (max 50).
+2. Rows carry **no name/symbol/price** — resolve the addresses you'll show with `token meta-multi --addresses a,b,...` (max 50). For a token you already know, `token statistic --address <MINT>` returns the same metrics object directly.
 Only the first 10,000 matching rows are reachable (deeper pages come back empty), so narrow with `--filter` rather than paging deep. Flags, metric names and data quirks → [references/token.md](references/token.md).
 
 ### Market / ecosystem overview
