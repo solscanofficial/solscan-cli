@@ -22,6 +22,7 @@ solscan token <action> [options]
 | `search` | Search by keyword/address/name/symbol | `--keyword` | `--search-mode`, `--search-by`, `--exclude-unverified`, `--sort-by`, `--sort-order`, `--page`, `--page-size` |
 | `trending` | Currently trending tokens | — | `--limit` |
 | `list` | Full token list | — | `--page`, `--page-size`, `--sort-by`, `--sort-order` |
+| `list-v2` | Token screener: ~190 activity/price/holder metrics per token, sort + range-filter on any of them | — | `--sort-by`, `--sort-order`, `--page`, `--page-size`, `--platform`, `--filter` (repeatable) |
 | `top` | Top tokens by market cap | — | — |
 | `latest` | Newly listed tokens by launch platform | — | `--platform-id`, `--page`, `--page-size` |
 
@@ -49,6 +50,15 @@ Transfer/DeFi `--activity-type` enums are the same lists as in [account.md](acco
 
 **`list`**: `--sort-by` `holder`\|`market_cap`(default)\|`created_time` · `--page-size` `10/20/30/40/60/100`.
 
+**`list-v2`** (token screener):
+- `--sort-by` any metric below (default `volume_1m`, the API's default; pass an explicit metric such as `volume_24h` for a more stable ranking) · `--sort-order` `asc`\|`desc`(default).
+- `--filter <metric>=<min>,<max>` is **repeatable**, one metric per flag. Leave one side empty for an open bound: `--filter volume_24h=100000,` (≥ 100k), `--filter holder_top_1_balance_pct=,20` (≤ 20%), or set both: `--filter market_cap=1000000,5000000`. Bounds are inclusive. Every metric is filterable, and filters on different metrics are AND-ed. The CLI maps each one to the API's `from_<metric>`/`to_<metric>` params and rejects unknown metric names before calling the API.
+- `--platform` comma-separated, any of the `latest --platform-id` values below. Multiple values are OR-ed.
+- `--page-size` `10/20/30/40/60/100` (default `10`, anything else → `400`) · `--page` `1`–`1000`. `data.total` is capped at `10000` and only that window is reachable: once `page × page-size` passes 10000 (e.g. `--page-size 100 --page 101`) the response is `list_tokens: []` with `total: 0`. Stop paging on an empty `list_tokens`; to reach tokens beyond the window, tighten `--filter` instead of paging deeper.
+- **Metrics**: `<activity>_<window>` and `<activity>_<window>_change_pct`, where activity ∈ `volume`, `buy_volume`, `sell_volume` (USD), `num_trade`, `num_buy_trade`, `num_sell_trade`, `num_trader`, `num_buyer`, `num_seller` and window ∈ `1m`, `5m`, `30m`, `1h`, `4h`, `8h`, `24h`, `7d`, `30d` · `price_<window>_change_pct` · `trader_hhi_24h`, `trader_top_{1,5,20,100}_volume_pct_24h` · `market_cap`, `total_supply`, `liquidity`, `num_pool`, `num_holder`, `fdv`, `circulating_supply`, `first_listing_time` (unix seconds) · `holder_gini`, `holder_hhi`, `holder_top_{1,5,20,100}_balance_pct`. Percentages are 0–100; gini/HHI are 0–1.
+- Rows have **no name, symbol, decimals or price**, only `token_address` plus metrics. Resolve identity with `meta-multi` before showing tokens to the user. Response fields and quirks → [responses/token-list-v2.md](responses/token-list-v2.md).
+- `--no-json` prints all 193 fields per row, which gets very long. For user-facing output, take the JSON and show only the relevant columns.
+
 **`trending`**: `--limit` (default `10`, max `100`) - no sort/filter flags. Response rows are identity-only (`address`/`decimals`/`name`/`symbol`) — thinner than `list`/`top`, which also carry `market_cap`/`price`/`holder`; see [responses/token-list.md](responses/token-list.md#trending).
 
 **`top`**: takes **no options at all** — no pagination, sorting, or limit flag; the API returns a fixed top-N list.
@@ -57,7 +67,7 @@ Transfer/DeFi `--activity-type` enums are the same lists as in [account.md](acco
 
 ## Response Fields
 
-Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`, `price`, `price-multi`) / [responses/token-price-ohlcv.md](responses/token-price-ohlcv.md) (`price-ohlcv`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`, `trending`, `latest`) / [responses/token-historical.md](responses/token-historical.md) (`historical`) / [responses/token-search.md](responses/token-search.md) (`search`).
+Field-by-field description of each action's JSON response (types, meaning, edge cases): [responses/token.md](responses/token.md) (envelope) → [responses/token-info.md](responses/token-info.md) (`meta`, `meta-multi`) / [responses/token-price.md](responses/token-price.md) (`price-latest`, `price-history`, `price`, `price-multi`) / [responses/token-price-ohlcv.md](responses/token-price-ohlcv.md) (`price-ohlcv`) / [responses/token-activity.md](responses/token-activity.md) (`transfers`, `defi`, `defi-export`) / [responses/token-market.md](responses/token-market.md) (`markets`) / [responses/token-holders.md](responses/token-holders.md) (`holders`) / [responses/token-list.md](responses/token-list.md) (`list`, `top`, `trending`, `latest`) / [responses/token-list-v2.md](responses/token-list-v2.md) (`list-v2`) / [responses/token-historical.md](responses/token-historical.md) (`historical`) / [responses/token-search.md](responses/token-search.md) (`search`).
 
 ## Examples
 
@@ -83,6 +93,15 @@ solscan token markets --token So11111111111111111111111111111111111111112,EPjFWd
 
 solscan token list --sort-by holder --sort-order desc --page-size 20
 solscan token latest --platform-id pumpfun --page-size 20
+
+# Screener: biggest 1h gainers among pump.fun/meteora tokens with >= $100k 24h volume
+solscan token list-v2 --sort-by price_1h_change_pct --filter volume_24h=100000, --platform pumpfun,meteora
+
+# Newest tokens where the top holder owns <= 20% and >= 200 traders in 24h (page 2 of 20-row pages)
+solscan token list-v2 --sort-by first_listing_time --filter holder_top_1_balance_pct=,20 --filter num_trader_24h=200, --page-size 20 --page 2
+
+# Small caps ($1M-$5M market cap) with >= $50k liquidity, by 24h volume
+solscan token list-v2 --sort-by volume_24h --filter market_cap=1000000,5000000 --filter liquidity=50000, --page-size 40
 solscan token historical --address So11111111111111111111111111111111111111112 --range 30
 
 # Fuzzy name search

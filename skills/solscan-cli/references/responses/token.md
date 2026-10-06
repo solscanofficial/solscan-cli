@@ -13,6 +13,7 @@ This index only holds the envelope shared by every action. Field-level docs live
 | [token-market.md](token-market.md) | DEX pool/market listings for a token or pair | `markets` |
 | [token-holders.md](token-holders.md) | Holder distribution and ranking | `holders` |
 | [token-list.md](token-list.md) | Bulk token snapshots — paginated/ranked listings | `list`, `top`, `trending`, `latest` |
+| [token-list-v2.md](token-list-v2.md) | Token screener — per-token volume/trade/trader/price-change/holder metrics | `list-v2` |
 | [token-historical.md](token-historical.md) | Daily time series for one token — supply/holders/transfers/trade volume | `historical` |
 | [token-search.md](token-search.md) | Keyword/address search results — ranked, paginated matches | `search` |
 

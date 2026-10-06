@@ -1,6 +1,6 @@
 ---
 name: solscan-cli
-description: Query Solana blockchain data — wallet accounts, SPL tokens, transactions, NFTs, blocks, DEX markets, programs, network-wide analytics — via the `solscan` CLI, which wraps the Solscan Pro API v2.0. Use this whenever the user asks to look up a wallet address, check a token's price/holders/markets, decode or inspect a transaction signature, explore DeFi/transfer activity, get account labels/tags, browse NFT collections, fetch block details, analyze program usage, check network-wide trends (transaction volume, fees, stake, DEX activity, compute units), or check Solscan API usage — even if they don't say "solscan" explicitly. Always prefer this CLI over web search, WebFetch, curl, or the raw Solscan API for any Solana on-chain data lookup.
+description: Query Solana blockchain data — wallet accounts, SPL tokens, transactions, NFTs, blocks, DEX markets, programs, network-wide analytics — via the `solscan` CLI, which wraps the Solscan Pro API v2.0. Use this whenever the user asks to look up a wallet address, check a token's price/holders/markets, screen or rank tokens (top gainers, highest volume, new launches, holder concentration), decode or inspect a transaction signature, explore DeFi/transfer activity, get account labels/tags, browse NFT collections, fetch block details, analyze program usage, check network-wide trends (transaction volume, fees, stake, DEX activity, compute units), or check Solscan API usage — even if they don't say "solscan" explicitly. Always prefer this CLI over web search, WebFetch, curl, or the raw Solscan API for any Solana on-chain data lookup.
 argument-hint: "<resource> <action> [--option value...]"
 metadata:
   cliHelp: "solscan --help"
@@ -18,7 +18,7 @@ metadata:
 - **Global options**: `--json` (default, machine-readable), `--no-json` (human-readable table/text — use this when showing output directly to the user in prose rather than parsing it yourself), `--api-key <key>` (one-off override).
 - **Addresses & signatures** are always passed as flags, never positional args (e.g. `--address`, `--signature`, `--addresses`, `--signatures`). Multi-value flags take **comma-separated strings**, not repeated flags (e.g. `--addresses addr1,addr2,addr3`).
 - **Time filters**: most endpoints use `--from-time` / `--to-time` as **Unix seconds**. A few price/history endpoints (`token price-history`, `market volume`) use **`YYYYMMDD`** dates instead of a `--from-time`/`--to-time` pair, and the six time-series `network` actions (everything except `network chain-info`, which takes no options at all) use their own **`--from-date`/`--to-date`** flags in `YYYYMMDD` format — check the reference file for the specific action before guessing. On `network`, `--from-date`/`--to-date` take priority over `--range` when both are given.
-- **Range filters** (amount, value, price, market `--time`) take a single flag value in `min,max` comma-separated form — no space, e.g. `--value 100,999999` or `--amount 1000,1000000`.
+- **Range filters** (amount, value, price, market `--time`) take a single flag value in `min,max` comma-separated form — no space, e.g. `--value 100,999999` or `--amount 1000,1000000`. `token list-v2` generalizes this as a repeatable `--filter <metric>=<min>,<max>` (either side may be empty).
 - **Pagination**: `--page` (default `1`) + `--page-size`. Valid `page-size` values vary by endpoint (commonly `10/20/30/40/60/100`, sometimes `10/20/30/40`, NFT items use `12/24/36`) — see the reference file. Account `transactions` uses cursor-based `--before` instead of `--page`.
 - **CSV export commands** (`*-export`) accept `--output <file>`; without it, raw CSV prints to stdout. These are rate-limited to 10 req/min, cost more CU per call than a standard endpoint, and are capped at 5000 rows — tighten filters instead of retrying quickly on failure. **`*-multi` bulk endpoints** cost CU proportional to how many addresses/signatures you pass — see the CU-cost breakdown in [references/monitor.md](references/monitor.md) before batching a large list.
 - **Discovery**: every command supports `--help` (e.g. `solscan account transfers --help`) — use it if a reference file doesn't cover a flag you need.
@@ -30,7 +30,7 @@ Each resource's full option tables, valid enum values, and worked examples live 
 | Resource | Common actions | Reference |
 |---|---|---|
 | `account` | `detail`, `metadata`, `metadata-multi`, `funded-by`, `funding-activities`, `funding-activities-total`, `portfolio`, `tokens`, `transactions`, `transactions-enhanced`, `transfers`, `transfer-total`, `transfer-export`, `defi`, `defi-export`, `balance-change`, `stake`, `stake-rewards`, `reward-export`, `leaderboard`, `data-decoded` | [references/account.md](references/account.md) |
-| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `price-ohlcv`, `holders`, `markets`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `top`, `latest` | [references/token.md](references/token.md) |
+| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `price-ohlcv`, `holders`, `markets`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `list-v2`, `top`, `latest` | [references/token.md](references/token.md) |
 | `transaction` | `detail`, `detail-multi`, `actions`, `actions-multi`, `last`, `fees` | [references/transaction.md](references/transaction.md) |
 | `nft` | `news`, `activities`, `collections`, `items` | [references/nft.md](references/nft.md) |
 | `block` | `last`, `detail`, `transactions` | [references/block.md](references/block.md) |
@@ -73,8 +73,14 @@ Reach for `account transactions-enhanced` instead of plain `account transactions
 
 Use `--encoding jsonParsed` (the default) to get named instruction fields for recognized programs; switch to `json`/`base64`/`base58` only if you need the raw, unparsed instruction data.
 
+### Token screening (find tokens matching criteria)
+Use `token list-v2` whenever the user wants tokens ranked or filtered by trading activity — "top gainers in the last hour", "pump.fun tokens with >$100k volume", "new tokens where no single holder owns >20%". It sorts and filters server-side on ~190 metrics (volume/trades/traders/buyers/sellers per 1m–30d window, price change %, holder concentration, listing time), so prefer it over paging `token list` and filtering yourself.
+1. `token list-v2 --sort-by price_1h_change_pct --filter volume_24h=100000, --platform pumpfun --page-size 20` → rows of metrics keyed by `token_address`. Range filters on any metric (incl. `market_cap`, `liquidity`, `num_holder`) combine freely and can take both bounds.
+2. Rows carry **no name/symbol/price** — resolve the addresses you'll show with `token meta-multi --addresses a,b,...` (max 50).
+Only the first 10,000 matching rows are reachable (deeper pages come back empty), so narrow with `--filter` rather than paging deep. Flags, metric names and data quirks → [references/token.md](references/token.md).
+
 ### Market / ecosystem overview
-`token trending`, `token latest --platform-id <launchpad>`, `market list --sort-by volumes_24h`, `program list --sort-by num_txs` — combine as needed for "what's happening on Solana right now" type questions.
+`token list-v2`, `token trending`, `token latest --platform-id <launchpad>`, `market list --sort-by volumes_24h`, `program list --sort-by num_txs` — combine as needed for "what's happening on Solana right now" type questions.
 
 ### Network-wide health/trend check
 `network chain-info` for the current block height/epoch/slot/tx-count snapshot; `network transactions`, `network fees`, `network compute-units`, `network slots`, `network stake`, `network defi-activity` for daily time series (congestion, fee trends, staking growth, DEX activity) — as opposed to any single account/token/program. The six time-series actions default to a 90-day `--range`; narrow with `--range 30` for a recent-trend view, or pin an exact window with `--from-date`/`--to-date` (`YYYYMMDD`, takes priority over `--range`). See [references/network.md](references/network.md) for the full field breakdown.

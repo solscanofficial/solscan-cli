@@ -139,6 +139,7 @@ solscan token holders --address EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v --f
 # Token: discovery
 solscan token trending --limit 20 --no-json
 solscan token latest --platform-id pumpfun --page-size 20
+solscan token list-v2 --sort-by price_1h_change_pct --filter volume_24h=100000, --platform pumpfun
 
 # Transaction: full detail vs. decoded human-readable actions
 solscan transaction detail --signature 5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQU
