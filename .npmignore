@@ -16,7 +16,6 @@ coverage/
 .nyc_output/
 *.md
 !README.md
-!skills/**/*.md
 .eslintrc*
 .prettierrc*
 vitest.config.js

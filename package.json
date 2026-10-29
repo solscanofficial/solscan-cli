@@ -10,7 +10,6 @@
   "files": [
     "bin",
     "src",
-    "skills",
     "README.md"
   ],
   "scripts": {

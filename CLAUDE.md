@@ -76,7 +76,7 @@ Key patterns:
 
 ## Agent Skill
 
-`skills/solscan-cli/SKILL.md` teaches Claude Code (and other skill-aware agents) how to drive this CLI directly — command shape, pagination/time-filter conventions, and an action index pointing into per-resource reference files (`skills/solscan-cli/references/*.md`). It ships inside the published npm package (see `files` in package.json / the `!skills/**/*.md` exception in `.npmignore`), mirroring how the individual `src/commands/*.js` files are organized. When adding or renaming a command, update the matching reference file so the skill doesn't drift from actual CLI behavior.
+The `solscan-cli` Agent Skill (which teaches Claude Code and other skill-aware agents how to drive this CLI — command shape, pagination/time-filter conventions, and an action index pointing into per-resource reference files) lives in a separate repository: [solscanofficial/solscan-skills](https://github.com/solscanofficial/solscan-skills), under `skills/solscan-cli/`. Its `references/<resource>.md` files mirror the `src/commands/*.js` files here. When adding or renaming a command, update the matching reference file in that repo so the skill doesn't drift from actual CLI behavior.
 
 ## Testing
 

@@ -2,7 +2,7 @@
 
 Command-line tool for querying Solana blockchain data via the [Solscan Pro API v2.0](https://pro-api.solscan.io/pro-api-docs/v2.0) — accounts, tokens, transactions, NFTs, blocks, markets, programs, network-wide analytics, and API monitoring. 70+ actions, JSON and human-readable output.
 
-Ships with a bundled [Agent Skill](#agent-skills) so AI coding assistants (Claude Code and others) query Solana data through this CLI instead of scraping solscan.io or guessing at the API.
+Has a companion [Agent Skill](#agent-skills) (maintained in [solscan-skills](https://github.com/solscanofficial/solscan-skills)) so AI coding assistants (Claude Code and others) query Solana data through this CLI instead of scraping solscan.io or guessing at the API.
 
 ---
 
@@ -101,19 +101,19 @@ solscan [global-options] <resource> <action> [action-options]
 
 ## CLI Reference
 
-Every action's full option table, default values, valid enums, and pagination rules live in [`skills/solscan-cli/references/`](skills/solscan-cli/references/) — one file per resource, kept in sync with the actual `src/commands/*.js` implementations. This README only covers the shape of things and a handful of common examples; treat the reference files as the source of truth for exact flags.
+Every action's full option table, default values, valid enums, and pagination rules are documented in the [`solscan-cli` skill references](https://github.com/solscanofficial/solscan-skills/tree/main/skills/solscan-cli/references/) in the [solscan-skills](https://github.com/solscanofficial/solscan-skills) repo — one file per resource, tracking the latest CLI on `main`. For the exact flags of the version you have installed, `solscan <resource> <action> --help` is authoritative. If you've installed the [Agent Skill](#agent-skills), your agent already uses its local copy of these files — no need to open the links below. This README only covers the shape of things and a handful of common examples.
 
 | Resource | Actions | Full reference |
 |----------|---------|-----------------|
-| `account` | `detail`, `data-decoded`, `metadata`, `metadata-multi`, `funded-by`, `funding-activities`, `funding-activities-total`, `tokens`, `transactions`, `transactions-enhanced`, `transfers`, `transfer-total`, `transfer-export`, `defi`, `defi-export`, `balance-change`, `portfolio`, `stake`, `stake-rewards`, `reward-export`, `leaderboard` | [references/account.md](skills/solscan-cli/references/account.md) |
-| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `price-ohlcv`, `holders`, `markets`, `statistic`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `list-v2`, `top`, `latest` | [references/token.md](skills/solscan-cli/references/token.md) |
-| `transaction` | `detail`, `detail-multi`, `actions`, `actions-multi`, `last`, `fees` | [references/transaction.md](skills/solscan-cli/references/transaction.md) |
-| `nft` | `news`, `activities`, `collections`, `items` | [references/nft.md](skills/solscan-cli/references/nft.md) |
-| `block` | `last`, `detail`, `transactions` | [references/block.md](skills/solscan-cli/references/block.md) |
-| `market` | `list`, `info`, `volume`, `positions`, `price-ohlcv` | [references/market.md](skills/solscan-cli/references/market.md) |
-| `program` | `list`, `popular`, `analytics` | [references/program.md](skills/solscan-cli/references/program.md) |
-| `monitor` | `usage` | [references/monitor.md](skills/solscan-cli/references/monitor.md) |
-| `network` | `chain-info`, `transactions`, `stake`, `fees`, `slots`, `defi-activity`, `compute-units` | [references/network.md](skills/solscan-cli/references/network.md) |
+| `account` | `detail`, `data-decoded`, `metadata`, `metadata-multi`, `funded-by`, `funding-activities`, `funding-activities-total`, `tokens`, `transactions`, `transactions-enhanced`, `transfers`, `transfer-total`, `transfer-export`, `defi`, `defi-export`, `balance-change`, `portfolio`, `stake`, `stake-rewards`, `reward-export`, `leaderboard` | [references/account.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/account.md) |
+| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `price-ohlcv`, `holders`, `markets`, `statistic`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `list-v2`, `top`, `latest` | [references/token.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/token.md) |
+| `transaction` | `detail`, `detail-multi`, `actions`, `actions-multi`, `last`, `fees` | [references/transaction.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/transaction.md) |
+| `nft` | `news`, `activities`, `collections`, `items` | [references/nft.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/nft.md) |
+| `block` | `last`, `detail`, `transactions` | [references/block.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/block.md) |
+| `market` | `list`, `info`, `volume`, `positions`, `price-ohlcv` | [references/market.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/market.md) |
+| `program` | `list`, `popular`, `analytics` | [references/program.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/program.md) |
+| `monitor` | `usage` | [references/monitor.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/monitor.md) |
+| `network` | `chain-info`, `transactions`, `stake`, `fees`, `slots`, `defi-activity`, `compute-units` | [references/network.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/network.md) |
 
 **Pagination**: most list endpoints take `--page` (default `1`) and `--page-size` (default `10`; valid values vary by endpoint — `10/20/30/40/60/100` is most common). `account transactions` uses cursor-based `--before` instead. Some actions use `--limit` in place of page/page-size. See the reference file for exact valid values per action.
 
@@ -212,26 +212,20 @@ EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v         USDC    USD Coin     1.00
 
 ## Agent Skills
 
-This repo ships [`skills/solscan-cli/SKILL.md`](skills/solscan-cli/SKILL.md) — an [Agent Skill](https://agentskills.io/) that teaches AI coding assistants how to drive this CLI directly: command shape, pagination/time-filter conventions, an action index, common workflows, and error-handling guidance, with the full per-resource parameter tables split into [`skills/solscan-cli/references/`](skills/solscan-cli/references/).
-
-It's published inside the `solscan-cli` npm package, so any tool that discovers skills from an installed package's `skills/` folder picks it up automatically. For Claude Code, point it at the file directly or add the package's skill directory:
-
-```bash
-echo "$(npm root -g)/solscan-cli/skills/solscan-cli/SKILL.md"
-```
+The [`solscan-cli` Agent Skill](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/SKILL.md) lives in a separate repository, [solscanofficial/solscan-skills](https://github.com/solscanofficial/solscan-skills). It's an [Agent Skill](https://agentskills.io/) that teaches AI coding assistants how to drive this CLI directly: command shape, pagination/time-filter conventions, an action index, common workflows, and error-handling guidance, with the full per-resource parameter tables split into [`references/`](https://github.com/solscanofficial/solscan-skills/tree/main/skills/solscan-cli/references/).
 
 ### Installing with the `skills` CLI
 
-You can also install it with the [`skills` CLI](https://skills.sh/), which links `skills/solscan-cli` into your agent's skill directory:
+Install it with the [`skills` CLI](https://skills.sh/), which links `skills/solscan-cli` into your agent's skill directory:
 
 ```bash
-# From a local clone of this repo
-git clone https://github.com/solscanofficial/solscan-cli.git
-cd solscan-cli
-npx skills add . --skill "solscan-cli"
+# Directly from GitHub
+npx skills add solscanofficial/solscan-skills --skill "solscan-cli"
 
-# Or directly from GitHub, without cloning first
-npx skills add solscanofficial/solscan-cli --skill "solscan-cli"
+# Or from a local clone of the skills repo
+git clone https://github.com/solscanofficial/solscan-skills.git
+cd solscan-skills
+npx skills add . --skill "solscan-cli"
 ```
 
 Add `-g` to either command to install the skill globally instead of per-project.
@@ -252,10 +246,6 @@ solscan-cli/
 │   ├── api.js                  # Axios HTTP client & error handling
 │   ├── formatter.js            # JSON / human-readable output formatter
 │   └── commands/                # account, token, transaction, nft, block, market, program, monitor, network
-├── skills/
-│   └── solscan-cli/
-│       ├── SKILL.md              # Agent-facing usage guide
-│       └── references/           # Full per-resource parameter reference
 ├── package.json
 └── README.md
 ```
