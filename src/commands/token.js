@@ -207,11 +207,25 @@ export function registerTokenCommand(program) {
 
   token
     .command('trending')
-    .description('Get the list of trending tokens')
-    .option('--limit <number>', 'Number of results (max 100)', '10')
+    .description('Get the list of trending tokens ranked within a timeframe, with market metrics (volume, trades/traders, price change, liquidity, market cap, holders, ...)')
+    .option('--timeframe <timeframe>', 'Timeframe used to rank trending tokens: 1h | 4h | 24h', '24h')
+    .option('--page <number>', 'Page number (default 1). When --page or --page-size is set, --limit is ignored')
+    .option('--page-size <number>', 'Items per page: 10 | 20 | 30 | 40 (default 10). When --page or --page-size is set, --limit is ignored')
+    .option('--limit <number>', 'Deprecated: use --page/--page-size. Number of results (max 100); only used when neither --page nor --page-size is set')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
-      const data = await makeRequest('/token/trending', { limit: parseInt(opts.limit) }, { apiKey: root.apiKey });
+      const params = { timeframe: opts.timeframe };
+      if (opts.page) params.page = parseInt(opts.page);
+      if (opts.pageSize) params.page_size = parseInt(opts.pageSize);
+      if (opts.limit) {
+        if (opts.page || opts.pageSize) {
+          console.error('Warning: --limit is ignored when --page or --page-size is set.');
+        } else {
+          console.error('Warning: --limit is deprecated; use --page and --page-size instead.');
+          params.limit = parseInt(opts.limit);
+        }
+      }
+      const data = await makeRequest('/token/trending', params, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });
 
