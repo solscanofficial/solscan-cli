@@ -106,7 +106,7 @@ Every action's full option table, default values, valid enums, and pagination ru
 | Resource | Actions | Full reference |
 |----------|---------|-----------------|
 | `account` | `detail`, `data-decoded`, `metadata`, `metadata-multi`, `funded-by`, `funding-activities`, `funding-activities-total`, `tokens`, `transactions`, `transactions-enhanced`, `transfers`, `transfer-total`, `transfer-export`, `defi`, `defi-export`, `balance-change`, `portfolio`, `stake`, `stake-rewards`, `reward-export`, `leaderboard` | [references/account.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/account.md) |
-| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `price-ohlcv`, `holders`, `markets`, `statistic`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `list-v2`, `top`, `latest` | [references/token.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/token.md) |
+| `token` | `meta`, `meta-multi`, `price-latest`, `price-history`, `price-ohlcv`, `holders`, `markets`, `statistic`, `transfers`, `defi`, `defi-export`, `historical`, `search`, `trending`, `list`, `list-v2`, `latest`, `top` (deprecated) | [references/token.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/token.md) |
 | `transaction` | `detail`, `detail-multi`, `actions`, `actions-multi`, `last`, `fees` | [references/transaction.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/transaction.md) |
 | `nft` | `news`, `activities`, `collections`, `items` | [references/nft.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/nft.md) |
 | `block` | `last`, `detail`, `transactions` | [references/block.md](https://github.com/solscanofficial/solscan-skills/blob/main/skills/solscan-cli/references/block.md) |
@@ -204,9 +204,20 @@ EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v         USDC    USD Coin     1.00
 |-----------|---------|-------------------|
 | `400` | Bad request — check your parameters | Verify address format, enum values (type, page_size, range, etc.) |
 | `401` | Authentication failed | Run `solscan config set-api-key <KEY>` |
-| `403` | Forbidden — insufficient permissions | Upgrade your API plan |
+| `403` | Forbidden — insufficient permissions | Upgrade your API plan (see [Pro API Level 2+ commands](#pro-api-level-2-commands)) |
 | `429` | Rate limit exceeded | Wait a moment and try again |
 | `500` | Internal server error | Retry; report if persistent |
+
+### Pro API Level 2+ commands
+
+These commands call endpoints that are only available from **Pro API Level 2 and above**. With a lower-level API key they fail with `403`:
+
+| Resource | Commands |
+|----------|----------|
+| `account` | `metadata`, `metadata-multi`, `funded-by`, `funding-activities`, `funding-activities-total` |
+| `token` | `meta-multi`, `price-ohlcv`, `statistic`, `list-v2`, `price-multi` (deprecated) |
+| `transaction` | `detail-multi`, `actions-multi` |
+| `market` | `price-ohlcv` |
 
 ---
 

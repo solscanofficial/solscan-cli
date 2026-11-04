@@ -402,7 +402,7 @@ export function registerAccountCommand(program) {
 
   account
     .command('metadata')
-    .description('Get the metadata of an account')
+    .description('Get the metadata of an account (requires Pro API Level 2+)')
     .requiredOption('--address <address>', 'A wallet address on solana blockchain')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
@@ -412,7 +412,7 @@ export function registerAccountCommand(program) {
 
   account
     .command('metadata-multi')
-    .description('Get the metadata of multiple accounts (max 50)')
+    .description('Get the metadata of multiple accounts (max 50) (requires Pro API Level 2+)')
     .requiredOption('--addresses <addresses>', 'Comma-separated wallet addresses (max 50)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
@@ -442,7 +442,7 @@ export function registerAccountCommand(program) {
 
   account
     .command('funded-by')
-    .description('Get funder accounts for multiple accounts (max 50)')
+    .description('Get funder accounts for multiple accounts (max 50) (requires Pro API Level 2+)')
     .requiredOption('--addresses <addresses>', 'Comma-separated wallet addresses (max 50)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
@@ -498,7 +498,7 @@ export function registerAccountCommand(program) {
 
   account
     .command('funding-activities')
-    .description('Get the list of funding activities performed by an address (native SOL transfers that created/funded other accounts)')
+    .description('Get the list of funding activities performed by an address (native SOL transfers that created/funded other accounts) (requires Pro API Level 2+)')
     .requiredOption('--address <address>', 'Solana wallet address of the funder')
     .option('--to <addresses>', 'Funded destination addresses, comma-separated (max 5)')
     .option('--exclude-to <addresses>', 'Exclude funded destination addresses, comma-separated (max 5)')
@@ -541,7 +541,7 @@ export function registerAccountCommand(program) {
 
   account
     .command('funding-activities-total')
-    .description('Get the total funding activities count of an address')
+    .description('Get the total funding activities count of an address (requires Pro API Level 2+)')
     .requiredOption('--address <address>', 'Solana wallet address of the funder')
     .option('--to <addresses>', 'Funded destination addresses, comma-separated (max 5)')
     .option('--exclude-to <addresses>', 'Exclude funded destination addresses, comma-separated (max 5)')

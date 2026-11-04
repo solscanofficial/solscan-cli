@@ -16,7 +16,7 @@ export function registerTransactionCommand(program) {
 
   tx
     .command('detail-multi')
-    .description('Get the detail of multiple transactions (max 50)')
+    .description('Get the detail of multiple transactions (max 50) (requires Pro API Level 2+)')
     .requiredOption('--signatures <sigs>', 'Comma-separated transaction signatures (max 50)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
@@ -51,7 +51,7 @@ export function registerTransactionCommand(program) {
 
   tx
     .command('actions-multi')
-    .description('Get the actions of multiple transactions (max 50)')
+    .description('Get the actions of multiple transactions (max 50) (requires Pro API Level 2+)')
     .requiredOption('--signatures <sigs>', 'Comma-separated transaction signatures (max 50)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();

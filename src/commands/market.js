@@ -78,7 +78,7 @@ export function registerMarketCommand(program) {
 
   market
     .command('price-ohlcv')
-    .description('Get market pool price OHLCV (Open, High, Low, Close, Volume) candle data')
+    .description('Get market pool price OHLCV (Open, High, Low, Close, Volume) candle data (requires Pro API Level 2+)')
     .requiredOption('--address <address>', 'Pool market address to fetch OHLCV data for')
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')

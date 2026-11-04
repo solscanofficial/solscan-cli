@@ -9,7 +9,7 @@ const NETWORK_ANALYTICS_BASE_URL = 'https://public-api.solscan.io';
 const ERROR_MESSAGES = {
   400: 'Bad request — check your parameters (e.g. invalid address format, type, page_size,...)',
   401: 'Authentication failed — check your API key',
-  403: 'Forbidden — your API key may lack the required permissions',
+  403: 'Forbidden — your API key may lack the required permissions (some endpoints require Pro API Level 2 or above)',
   429: 'Rate limit exceeded — wait and retry',
   500: 'Internal server error — try again later',
 };

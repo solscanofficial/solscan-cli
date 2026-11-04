@@ -24,6 +24,10 @@ const LIST_V2_PLATFORMS = [
   'stonkfun_launchpad',
 ];
 
+function warnDeprecated(command, replacement) {
+  console.error(`Warning: \`${command}\` is deprecated; use \`${replacement}\` instead.`);
+}
+
 function collectFilter(value, previous) {
   return previous.concat([value]);
 }
@@ -66,7 +70,7 @@ export function registerTokenCommand(program) {
 
   token
     .command('meta-multi')
-    .description('Get the metadata of multiple tokens (max 50)')
+    .description('Get the metadata of multiple tokens (max 50) (requires Pro API Level 2+)')
     .requiredOption('--addresses <addresses>', 'Comma-separated token addresses (max 50)')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
@@ -101,37 +105,6 @@ export function registerTokenCommand(program) {
     });
 
   token
-    .command('price')
-    .description('Get price of a token (deprecated: use token price-latest instead)')
-    .requiredOption('--address <address>', 'A token address on solana blockchain')
-    .option('--from-time <date>', 'Start date (YYYYMMDD format)')
-    .option('--to-time <date>', 'End date (YYYYMMDD format)')
-    .action(async (opts, cmd) => {
-      const root = cmd.optsWithGlobals();
-      const params = { address: opts.address };
-      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
-      if (opts.toTime) params.to_time = parseInt(opts.toTime);
-      const data = await makeRequest('/token/price', params, { apiKey: root.apiKey });
-      printOutput(data, root.json);
-    });
-
-  token
-    .command('price-multi')
-    .description('Get the token price of multiple tokens (max 50) (deprecated: use token price-latest instead)')
-    .requiredOption('--addresses <addresses>', 'Comma-separated token addresses (max 50)')
-    .option('--from-time <date>', 'Start date (YYYYMMDD format)')
-    .option('--to-time <date>', 'End date (YYYYMMDD format)')
-    .action(async (opts, cmd) => {
-      const root = cmd.optsWithGlobals();
-      const addressArray = opts.addresses.split(',').map(a => a.trim());
-      const params = { address: addressArray };
-      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
-      if (opts.toTime) params.to_time = parseInt(opts.toTime);
-      const data = await makeRequest('/token/price/multi', params, { apiKey: root.apiKey });
-      printOutput(data, root.json);
-    });
-
-  token
     .command('price-latest')
     .description('Get the latest price of multiple tokens (max 50)')
     .requiredOption('--addresses <addresses>', 'Comma-separated token addresses (max 50)')
@@ -160,7 +133,7 @@ export function registerTokenCommand(program) {
 
   token
     .command('price-ohlcv')
-    .description('Get token price OHLCV (Open, High, Low, Close, Volume) candle data')
+    .description('Get token price OHLCV (Open, High, Low, Close, Volume) candle data (requires Pro API Level 2+)')
     .requiredOption('--address <address>', 'A token address on solana blockchain')
     .option('--from-time <timestamp>', 'Start time (unix seconds)')
     .option('--to-time <timestamp>', 'End time (unix seconds)')
@@ -249,7 +222,7 @@ export function registerTokenCommand(program) {
 
   token
     .command('list-v2')
-    .description('Token screener: list tokens with volume/trade/trader/price-change/holder metrics, sortable and filterable on any metric. Pages through at most the first 10,000 matching rows.')
+    .description('Token screener: list tokens with volume/trade/trader/price-change/holder metrics, sortable and filterable on any metric. Pages through at most the first 10,000 matching rows. (requires Pro API Level 2+)')
     .option('--sort-by <metric>', 'Sort metric (any filter metric, e.g. volume_24h | price_1h_change_pct | num_holder | first_listing_time)', 'volume_1m')
     .option('--sort-order <order>', 'Sort order: asc | desc', 'desc')
     .option('--page <number>', 'Page number (1-1000; rows past the first 10,000 come back empty)', '1')
@@ -285,20 +258,11 @@ Examples:
 
   token
     .command('statistic')
-    .description('Get trading statistics (volume/trades/traders/price change per 1m-30d window), market data and holder/trader concentration metrics for one token')
+    .description('Get trading statistics (volume/trades/traders/price change per 1m-30d window), market data and holder/trader concentration metrics for one token (requires Pro API Level 2+)')
     .requiredOption('--address <address>', 'A token address on solana blockchain')
     .action(async (opts, cmd) => {
       const root = cmd.optsWithGlobals();
       const data = await makeRequest('/token/statistic', { address: opts.address }, { apiKey: root.apiKey });
-      printOutput(data, root.json);
-    });
-
-  token
-    .command('top')
-    .description('Get the list of top tokens')
-    .action(async (_opts, cmd) => {
-      const root = cmd.optsWithGlobals();
-      const data = await makeRequest('/token/top', {}, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });
 
@@ -484,6 +448,50 @@ Examples:
       };
       if (opts.excludeUnverified) params.exclude_unverified_token = true;
       const data = await makeRequest('/token/search', params, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
+
+  // Deprecated endpoints, kept for backward compatibility and listed last.
+  token
+    .command('price')
+    .description('Deprecated: use token price-history instead. Get historical price of a token')
+    .requiredOption('--address <address>', 'A token address on solana blockchain')
+    .option('--from-time <date>', 'Start date (YYYYMMDD format)')
+    .option('--to-time <date>', 'End date (YYYYMMDD format)')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      warnDeprecated('token price', 'token price-history');
+      const params = { address: opts.address };
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
+      const data = await makeRequest('/token/price', params, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
+
+  token
+    .command('price-multi')
+    .description('Deprecated: use token price-history instead. Get historical price of multiple tokens (max 50) (requires Pro API Level 2+)')
+    .requiredOption('--addresses <addresses>', 'Comma-separated token addresses (max 50)')
+    .option('--from-time <date>', 'Start date (YYYYMMDD format)')
+    .option('--to-time <date>', 'End date (YYYYMMDD format)')
+    .action(async (opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      warnDeprecated('token price-multi', 'token price-history');
+      const addressArray = opts.addresses.split(',').map(a => a.trim());
+      const params = { address: addressArray };
+      if (opts.fromTime) params.from_time = parseInt(opts.fromTime);
+      if (opts.toTime) params.to_time = parseInt(opts.toTime);
+      const data = await makeRequest('/token/price/multi', params, { apiKey: root.apiKey });
+      printOutput(data, root.json);
+    });
+
+  token
+    .command('top')
+    .description('Deprecated: use token list --sort-by market_cap instead. Get the list of top tokens')
+    .action(async (_opts, cmd) => {
+      const root = cmd.optsWithGlobals();
+      warnDeprecated('token top', 'token list --sort-by market_cap');
+      const data = await makeRequest('/token/top', {}, { apiKey: root.apiKey });
       printOutput(data, root.json);
     });
 }
