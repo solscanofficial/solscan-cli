@@ -21,7 +21,7 @@ const LIST_V2_PLATFORMS = [
   'jupiter', 'lifinity', 'meteora', 'orca', 'raydium', 'phoenix', 'sanctum', 'kamino', 'pumpfun', 'openbook',
   'apepro', 'stabble', 'jupiterdca', 'jupiter_limit_order', 'solfi', 'zerofi', 'letsbonkfun_launchpad',
   'raydium_launchlab', 'believe_launchpad', 'moonshot_launchpad', 'jup_studio_launchpad', 'bags_launchpad',
-  'stonkfun_launchpad',
+  'stonkfun_launchpad', 'floatlaunch_launchpad'
 ];
 
 function warnDeprecated(command, replacement) {
